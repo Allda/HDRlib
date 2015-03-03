@@ -15,7 +15,8 @@ CONFIG   -= app_bundle
 TEMPLATE = app
 
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    ldrimage.cpp
 
 win32 {
     INCLUDEPATH  += $$quote(C:/MinGW/msys/1.0/local/include)
@@ -31,4 +32,10 @@ macx {
     INCLUDEPATH  += /usr/local/include
     LIBS         += -L/usr/local/lib -lexiv2
 }
+INCLUDEPATH += /usr/local/include/opencv2
+
+LIBS += `pkg-config opencv --libs`
+
+HEADERS += \
+    ldrimage.h
 
