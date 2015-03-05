@@ -14,14 +14,16 @@ using namespace cv;
 class LDRImage
 {
 public:
-    LDRImage(cv::Mat mat, int exposureTime);
+    LDRImage(cv::Mat mat, double exposureTime);
     LDRImage(const char *name);
     ~LDRImage();
     int getWidth();
     int getHeight();
+    Mat getImageMat();
     void toString();
     void showImage();
     bool getExifInfo(const char * name);
+    double getExposureTime();
     Vec3b getPixel(int x, int y);
 
 

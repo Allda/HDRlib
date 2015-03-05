@@ -6,7 +6,7 @@
 using namespace cv;
 using namespace std;
 
-LDRImage::LDRImage(cv::Mat mat, int exposureTime)
+LDRImage::LDRImage(cv::Mat mat, double exposureTime)
 {
     this->mat = mat;
     this->exposureTime = exposureTime;
@@ -16,9 +16,16 @@ LDRImage::LDRImage(cv::Mat mat, int exposureTime)
 }
 LDRImage::LDRImage(const char * name){
     mat = imread(name, CV_LOAD_IMAGE_COLOR);   // Read the file
+    if(!mat.data){
+        cout << "Nepodarilo se nahrat data" << endl;
+    }
     width = mat.cols;
     height = mat.rows;
     this->getExifInfo(name);
+}
+
+Mat LDRImage::getImageMat(){
+    return mat;
 }
 
 void LDRImage::toString(){
@@ -41,7 +48,6 @@ bool LDRImage::getExifInfo(const char * name){
         return false;
     image->readMetadata();
     Exiv2::ExifData &exifData = image->exifData();
-    cout << "qweqwe" << endl;
     exposureTime = exifData["Exif.Photo.ExposureTime"].toFloat();
     dateTime = exifData["Exif.Image.DateTime"].toString();
 
@@ -63,6 +69,9 @@ int LDRImage::getWidth(){
     return width;
 }
 
+double LDRImage::getExposureTime(){
+    return exposureTime;
+}
 
 LDRImage::~LDRImage()
 {

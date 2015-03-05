@@ -14,9 +14,17 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
+CONFIG += c++11
+
 
 SOURCES += main.cpp \
-    ldrimage.cpp
+    ldrimage.cpp \
+    hdrcreator.cpp \
+    weightfunction.cpp \
+    debevecmalikwf.cpp \
+    hdrimage.cpp \
+    exceptions/notenoughimagesexception.cpp \
+    exceptions/imagesizeexception.cpp
 
 win32 {
     INCLUDEPATH  += $$quote(C:/MinGW/msys/1.0/local/include)
@@ -37,5 +45,11 @@ INCLUDEPATH += /usr/local/include/opencv2
 LIBS += `pkg-config opencv --libs`
 
 HEADERS += \
-    ldrimage.h
+    ldrimage.h \
+    hdrcreator.h \
+    weightfunction.h \
+    debevecmalikwf.h \
+    hdrimage.h \
+    exceptions/notenoughimagesexception.h \
+    exceptions/imagesizeexception.h
 
