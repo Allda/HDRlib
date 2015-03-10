@@ -11,81 +11,52 @@
 #include "exceptions/notenoughimagesexception.h"
 #include "exceptions/imagesizeexception.h"
 #include "hdrimage.h"
+
+#include "tonemapping/linearoperator.h"
+#include "tonemapping/logoperator.h"
+#include "tonemapping/expoperator.h"
 using namespace cv;
 using namespace std;
+
+
+deque<LDRImage *> loadLDRImages(string name, string extension, int count, int start){
+    deque<LDRImage *> d;
+    for(int i = 0; i < count; i++){
+        string fileName = name + to_string(start++) + "." + extension;
+        cout << fileName << endl;
+        LDRImage * ldrImage = new LDRImage(fileName.c_str());
+        d.push_back(ldrImage);
+    }
+    return d;
+}
+
 
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
 
-    /*Mat mat;
-        mat = imread("1.tif", CV_LOAD_IMAGE_COLOR);   // Read the file
 
-        if(! mat.data )                              // Check for invalid input
-        {
-            cout <<  "Could not open or find the image" << std::endl ;
-            return -1;
-        }
-
-
-
-
-    Mat mat2;
-        mat2 = imread("2.tif", CV_LOAD_IMAGE_COLOR);   // Read the file
-
-        if(! mat2.data )                              // Check for invalid input
-        {
-            cout <<  "Could not open or find the image" << std::endl ;
-            return -1;
-        }
-
-
-
-
-    Mat mat3;
-        mat3 = imread("3.tif", CV_LOAD_IMAGE_COLOR);   // Read the file
-
-        if(! mat3.data )                              // Check for invalid input
-        {
-            cout <<  "Could not open or find the image" << std::endl ;
-            return -1;
-        }
-
-
-
-    LDRImage * image = new LDRImage(mat,0.5);
-    LDRImage * image2 = new LDRImage(mat2,0.01);
-    LDRImage * image3 = new LDRImage(mat3,0.005);*/
-
-    LDRImage * image = new LDRImage("img/1.JPG");
-    //image->showImage();
+    /*LDRImage * image = new LDRImage("img/1.JPG");
     LDRImage * image2 = new LDRImage("img/2.JPG");
-    LDRImage * image3 = new LDRImage("img/3.JPG");
-
-    //LDRImage *image2 = new LDRImage("img1.JPG");
+    LDRImage * image3 = new LDRImage("img/3.JPG");*/
 
 
-    //cout << image->getImageMat() << endl;
+    deque<LDRImage *> ldrImage = loadLDRImages(string("img/"),string("JPG"),3,1);
 
-    /*for(int y = 0; y < image->getHeight();y++){
-        for(int x = 0; x < image->getWidth();x++){
-            Vec3b  pixel = image->getPixel(x,y);
-            cout << (int)pixel.val[0] << " " << (int)pixel.val[1] << " "<< (int)pixel.val[2] << endl;
-        }
-    }*/
-
-    HDRCreator * hdr = new HDRCreator();
+    HDRCreator * hdr = new HDRCreator(ldrImage);
 
     DebevecMalikWF * wf = new DebevecMalikWF();
 
-    hdr->addImage(image);
+    /*hdr->addImage(image);
     hdr->addImage(image2);
-    hdr->addImage(image3);
+    hdr->addImage(image3);*/
     hdr->setWeightFunction(wf);
     cout << wf->getWeight(8) << endl;
+
+    HDRImage * out;
     try{
-        HDRImage out = hdr->buildHDR();
+        out = hdr->buildHDR();
         cout << "Done" << endl;
         /*cout << out.getMat() << endl;
         namedWindow( "Display window", CV_WINDOW_NORMAL | CV_WINDOW_KEEPRATIO );// Create a window for display.
@@ -101,6 +72,11 @@ int main(int argc, char *argv[])
         cout << "WF none"  << e.what() << endl;
     }
 
+
+    ExpOperator * op = new ExpOperator(out);
+    LDRImage * outputLDR = op->process(0.1,0.02);
+    //cout << outputLDR->getImageMat();
+    outputLDR->showImage();
 
 
     return a.exec();

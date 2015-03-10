@@ -16,6 +16,10 @@ class LDRImage
 public:
     LDRImage(cv::Mat mat, double exposureTime);
     LDRImage(const char *name);
+
+    // constructor without exposure
+    LDRImage(Mat mat);
+
     ~LDRImage();
     int getWidth();
     int getHeight();

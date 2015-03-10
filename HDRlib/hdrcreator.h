@@ -15,9 +15,10 @@ class HDRCreator
 {
 public:
     HDRCreator();
+    HDRCreator(deque<LDRImage *> imageList);
     void addImage(LDRImage * i);
     void setWeightFunction(WeightFunction * wf);
-    HDRImage buildHDR();
+    HDRImage *buildHDR();
     double getWFvalue(int i);
     ~HDRCreator();
 

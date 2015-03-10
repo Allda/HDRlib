@@ -4,23 +4,15 @@
 #include "exceptions/imagesizeexception.h"
 #include <iomanip>
 #include <math.h>
+#include "hdrimage.h"
 
 HDRCreator::HDRCreator()
 {
 
-    cout << "Step" <<output.step << endl;
-    int min = 0, max = 255;
-    double avg = (min + max)/2;
-    cout << avg;
-    for(int i = 0; i < 256;i++){
-        if(0.5*255 > i){
-            //cout << (i-min) /avg << endl;
-            table[i] = (double)(i-min) ;
-        }
-        else{
-            table[i] = (max - i);
-        }
-    }
+}
+
+HDRCreator::HDRCreator(deque<LDRImage *> imageList){
+    this->imageList = imageList;
 }
 
 void HDRCreator::addImage(LDRImage *i){
@@ -44,7 +36,7 @@ bool HDRCreator::checkImages(){
     return true;
 }
 
-HDRImage HDRCreator::buildHDR(){
+HDRImage * HDRCreator::buildHDR(){
     if(imageList.size() < 3){
         throw NotEnoughImagesException();
     }
@@ -52,69 +44,43 @@ HDRImage HDRCreator::buildHDR(){
         throw ImageSizeException();
     if(wf == NULL)
         throw exception();
+
     int width = imageList.at(0)->getImageMat().cols;
     int height = imageList.at(0)->getImageMat().rows;
     int channels = imageList.at(0)->getImageMat().channels();
 
-    output = Mat(width,height,CV_32FC3,Scalar(0,0,0));
-    //cout <<output << endl;
-    /*for(int i = 0; i < 255; i++)
-        cout << wf->getWeight(i) << endl;*/
+    double newPixel[channels];
+    double weightSum[channels];
+
+    output = Mat(height,width,CV_32FC3,Scalar(0,0,0));
+
     for(int x = 0; x < width;x++){ // each column
         for(int y = 0; y < height; y++){ // each row
-            //cout << "Pixel " << x << " " << y << endl;
-            double newPixel[channels];
             clearArray(newPixel,channels);
-            double weightSum[channels];
             clearArray(weightSum,channels);
-            //cout << fixed << setprecision(5);
-            for(int ch = 0; ch < channels; ch++){ // each image
-
-
-                //cout << "Channel " << ch << endl;
-                for(unsigned int i = 0; i < imageList.size();i++){ // each color channel
+            for(int ch = 0; ch < channels; ch++){ // each color channel
+                for(unsigned int i = 0; i < imageList.size();i++){ // each image
                     LDRImage * image = imageList.at(i);
                     Vec3f pixel = image->getPixel(x,y);
                     int channelValue = pixel[ch];
-                    //cout << channelValue << endl;
-                    //double k =  wf->getWeight(channelValue);
-                    //cout << newPixel[ch] <<"+ (" << channelValue << " * " << " / " << image->getExposureTime()<< " = ";
-                    //cout << "qweqweqwe" << endl;
-                    newPixel[ch] += ((channelValue * getWFvalue(channelValue))/image->getExposureTime());
-                    //cout << newPixel[ch] << endl;
-                    weightSum[ch] += getWFvalue(channelValue);
+                    newPixel[ch] += ((channelValue * wf->getWeight(channelValue))/image->getExposureTime());
+                    weightSum[ch] += wf->getWeight(channelValue);
                 }
             }
             for(int ch = 0; ch < channels; ch++){
-                //cout << newPixel[ch] << " / " << weightSum[ch];
                 newPixel[ch] = newPixel[ch] / weightSum[ch];
-                //cout << " =  " << newPixel[ch] << endl;
-                output.at<Vec3f>(x,y)[ch] = newPixel[ch];
-                //cout <<"...."<< x << " " << y << " " << ch << " " << (double)output.at<Vec3f>(x,y)[ch] << " " <<(double)newPixel[ch] << endl;
+                output.at<Vec3f>(y,x)[ch] = newPixel[ch];
             }
-            //cout << output << endl;
-            //cout << "x: " << x << " y: " << y << " " << width<<" " << height<< endl;
         }
-        //cout << "hey" << endl;
     }
     double min, max;
-    cv::minMaxLoc(output, &min, &max);
-    cout << "MIN: " << min << " MAX: " <<max << endl;
-    double e = 255/max;
-    Mat output2 = Mat(width,height,CV_8UC3,Scalar(0,0,0));
-    for(int x = 0; x < width;x++){
-        for(int y = 0; y < height;y++){
-            for(int ch = 0; ch < channels;ch++){
-                output2.at<Vec3b>(x,y)[ch] = (int)((log10(1 + output.at<Vec3f>(x,y)[ch] * 0.7)/log10(1+0.7*max))*255);
-            }
-        }
-    }
+    cout << output.cols << "x" << output.rows << endl;
+    cout << width << "x" << height << endl;
 
-    cout << output2<< endl;
-    namedWindow( "Display window", CV_WINDOW_NORMAL | CV_WINDOW_KEEPRATIO );// Create a window for display.
-    imshow( "Display window", output2 );
-    //cout << output << endl;
-    return output;
+    HDRImage * hdrImage = new HDRImage(output);
+    return hdrImage;
+
+
 
 }
 

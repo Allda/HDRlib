@@ -24,7 +24,11 @@ SOURCES += main.cpp \
     debevecmalikwf.cpp \
     hdrimage.cpp \
     exceptions/notenoughimagesexception.cpp \
-    exceptions/imagesizeexception.cpp
+    exceptions/imagesizeexception.cpp \
+    tonemapping/tonemapping.cpp \
+    tonemapping/linearoperator.cpp \
+    tonemapping/logoperator.cpp \
+    tonemapping/expoperator.cpp
 
 win32 {
     INCLUDEPATH  += $$quote(C:/MinGW/msys/1.0/local/include)
@@ -51,5 +55,9 @@ HEADERS += \
     debevecmalikwf.h \
     hdrimage.h \
     exceptions/notenoughimagesexception.h \
-    exceptions/imagesizeexception.h
+    exceptions/imagesizeexception.h \
+    tonemapping/tonemapping.h \
+    tonemapping/linearoperator.h \
+    tonemapping/logoperator.h \
+    tonemapping/expoperator.h
 
