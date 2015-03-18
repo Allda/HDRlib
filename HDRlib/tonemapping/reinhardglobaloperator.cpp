@@ -24,9 +24,22 @@ LDRImage * ReinhardGlobalOperator::process(){
         }
     }
     for(int i = 0; i < 3; i++){
-        cout << Lw[i] << " " <<  1/count *Lw[i] << endl;
+        Lw[i] = exp((1/count)*Lw[i]);
+        cout << Lw[i] << " " <<  1/count *Lw[i] << " " << exp((1/count)*Lw[i]) << endl;
     }
-    return NULL;
+
+    Mat LMat = Mat(height,width,CV_32FC3);
+    Mat output = Mat(height,width, CV_8UC3);
+    for(int x = 0; x < width; x++){
+        for(int y = 0; y < height; y++){
+            for(int ch = 0; ch < channels; ch++){
+                LMat.at<Vec3f>(y,x)[ch] = (0.72/Lw[ch]) * image->getMat().at<Vec3f>(y,x)[ch];
+                output.at<Vec3b>(y,x)[ch] = (LMat.at<Vec3f>(y,x)[ch]/(1+LMat.at<Vec3f>(y,x)[ch]))*255;
+            }
+        }
+    }
+    //cout << output << endl;
+    return new LDRImage(output);
 }
 
 ReinhardGlobalOperator::~ReinhardGlobalOperator()

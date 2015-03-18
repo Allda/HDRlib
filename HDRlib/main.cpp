@@ -18,14 +18,21 @@
 #include "tonemapping/logoperator.h"
 #include "tonemapping/expoperator.h"
 #include "tonemapping/reinhardglobaloperator.h"
+
+#include <QDir>
+#include <QStringList>
 using namespace cv;
 using namespace std;
 
 
-deque<LDRImage *> loadLDRImages(string name, string extension, int count, int start){
+deque<LDRImage *> loadLDRImages(string name, string extension, int count, int start, bool expand){
     deque<LDRImage *> d;
     for(int i = 0; i < count; i++){
-        string fileName = name + to_string(start++) + "." + extension;
+        string fileName;
+        if(expand && start < 10)
+            fileName = name + "0" +to_string(start++) + "." + extension;
+        else
+            fileName = name + to_string(start++) + "." + extension;
         cout << fileName << endl;
         LDRImage * ldrImage = new LDRImage(fileName.c_str());
         d.push_back(ldrImage);
@@ -69,23 +76,22 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-
-    vector<LDRImage *> ldrImages =  cameraInit();
+    /*vector<LDRImage *> ldrImages =  cameraInit();
     deque<LDRImage *> ldrImages2;
     for(unsigned i= 0; i < ldrImages.size();i++){
         Mat colorMat;
         LDRImage * ldrIm = ldrImages.at(i);
         cvtColor(ldrIm->getImageMat(),colorMat,COLOR_GRAY2BGR);
         ldrImages2.push_back(new LDRImage(colorMat, ldrIm->getExposureTime()));
-    }
+    }*/
     /*LDRImage * image = new LDRImage("img/1.JPG");
     LDRImage * image2 = new LDRImage("img/2.JPG");
     LDRImage * image3 = new LDRImage("img/3.JPG");*/
 
 
-    /*deque<LDRImage *> ldrImage = loadLDRImages(string("img/web2"),string("jpg"),3,1);*/
+    deque<LDRImage *> ldrImage = loadLDRImages(string("img/lampicka"),string("jpg"),15,1, true);
 
-    HDRCreator * hdr = new HDRCreator(ldrImages2);
+    HDRCreator * hdr = new HDRCreator(ldrImage);
 
     DebevecMalikWF * wf = new DebevecMalikWF();
 
@@ -112,8 +118,8 @@ int main(int argc, char *argv[])
     }
 
 
-    LogOperator * op = new LogOperator(out);
-    LDRImage * outputLDR = op->process(0.2,0.7);
+    ReinhardGlobalOperator * op = new ReinhardGlobalOperator(out);
+    LDRImage * outputLDR = op->process();
     //cout << outputLDR->getImageMat();
     outputLDR->showImage();
 
