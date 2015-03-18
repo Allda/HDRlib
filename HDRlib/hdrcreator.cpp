@@ -73,9 +73,6 @@ HDRImage * HDRCreator::buildHDR(){
             }
         }
     }
-    double min, max;
-    cout << output.cols << "x" << output.rows << endl;
-    cout << width << "x" << height << endl;
 
     HDRImage * hdrImage = new HDRImage(output);
     return hdrImage;

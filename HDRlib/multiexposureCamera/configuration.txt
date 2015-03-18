@@ -1,0 +1,62 @@
+
+# Volba akce, ktera se ma provest. Prehled akci:
+# SHOW - zobrazeni nahledu z kamery (bez ukladani)
+# RECORD - nahrani zaznamu z kamery (bez nahledu)
+# RECORD_AND_SHOW - nahrani zaznamu z kamery i s nahledem
+# Akci lze zadat i pres prikazovy radek, ktery ma prednost pred touto konfiguraci.
+ACTION = SHOW
+
+# Pomer velikosti originalniho snimku vuci zobrazovanemu snimku.
+VIEW_RATION = 0.75
+
+
+LOCAL_IP = 192.168.6.2
+CAMERA_IP = 192.168.6.1
+PORT = 10101
+
+MULTI_EXPOSURE_MODE = true
+
+# Pocet snimku kolik ma byt nahrano. Pokud je hodnota nastavena na nulu, tak
+# se nahravani ukonci klavesou Esc.
+NUMBER_OF_CAPTURED_FRAMES = 0
+
+CAMERA_GAIN = 120
+
+CAMERA_OFFSET = 24
+
+# Jednotlive konfigurece expozic pro multi-expozicni sekvence snimku
+# Hodna je v micro sekundach
+CAMERA_MULTI_EXPOSURE_0 = 1000
+
+CAMERA_MULTI_EXPOSURE_1 = 3000
+
+CAMERA_MULTI_EXPOSURE_2 = 9000
+
+CAMERA_MULTI_EXPOSURE_3 = 64000
+
+
+# Lze nastavit libovolnou sekvenci snimku, ktera se bude dokola opakovat. Zadavaji se
+# indexy parametru expozicnich casu (CAMERA_MULTI_EXPOSURE_?).
+MULTI_EXPOSURE_SEQUENCE = 0 1 2
+
+CAMERA_APERTURE = 2000
+
+HALF_FRAME = false
+
+
+CAMERA_ACTIVE_WINDOW = 286 1566 9 1024
+
+IRIS_PSD_PARAMS = 20 10 0 134 200
+
+IRIS_AUTO_EXPO_LIMIT = 20000
+
+IRIS_PSD_AUTO_MODE = false
+
+CAMERA_HEATING = false
+
+CAMERA_ANTI_FOG = false
+
+CAMERA_FLASH_TIME = 0
+
+
+

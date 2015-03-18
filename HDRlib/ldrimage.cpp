@@ -23,6 +23,7 @@ LDRImage::LDRImage(const char * name){
     width = mat.cols;
     height = mat.rows;
     this->getExifInfo(name);
+    cout << exposureTime << endl;
 }
 
 LDRImage::LDRImage(Mat mat){
@@ -62,7 +63,7 @@ bool LDRImage::getExifInfo(const char * name){
 
 Vec3b  LDRImage::getPixel(int x, int y){
     if(x > width || y > height)
-        return NULL;
+        throw exception();
     return mat.at<Vec3b>(y,x);
 }
 
