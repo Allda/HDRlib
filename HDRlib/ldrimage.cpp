@@ -79,6 +79,59 @@ double LDRImage::getExposureTime(){
     return exposureTime;
 }
 
+
+QImage LDRImage::getQImage(int maxWidth, int maxHeight){
+    if(maxWidth < 1)
+        maxWidth = 1;
+    if(maxHeight < 1)
+        maxHeight = 1;
+    float ratio;
+    bool cols;
+    if(maxWidth > mat.cols && maxHeight > mat.rows)
+        return this->getQImage();
+
+    if(mat.cols > mat.rows){
+        ratio = (float)maxWidth / mat.cols;
+        cols = true;
+    }
+    else{
+        ratio = (float)maxHeight / mat.rows;
+        cols = false;
+    }
+    cv::Mat newMat;
+    cv::resize(mat,newMat,cv::Size(),ratio, ratio);
+    if(cols){
+        if(newMat.rows > maxHeight)
+            ratio = (float)maxHeight/newMat.rows;
+        else
+            ratio = 1.0;
+    }
+    else{
+        if(newMat.cols > maxWidth)
+            ratio = (float)maxWidth/newMat.cols;
+        else
+            ratio = 1.0;
+    }
+    cv::Mat newMat2;
+    cv::resize(newMat,newMat2,cv::Size(),ratio,ratio);
+    QImage newQimage = this->Mat2QImage(newMat2);
+    return newQimage;
+}
+
+QImage LDRImage::getQImage(){
+    return this->Mat2QImage(this->mat);
+}
+
+QImage LDRImage::Mat2QImage(cv::Mat const& src)
+{
+     cv::Mat temp; // make the same cv::Mat
+     cvtColor(src, temp,CV_BGR2RGB); // cvtColor Makes a copt, that what i need
+     QImage dest((const uchar *) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
+     dest.bits(); // enforce deep copy, see documentation
+     // of QImage::QImage ( const uchar * data, int width, int height, Format format )
+     return dest;
+}
+
 LDRImage::~LDRImage()
 {
 

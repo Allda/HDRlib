@@ -6,7 +6,9 @@
 #include <QScrollArea>
 #include <QVBoxLayout>
 #include <QLabel>
-
+#include "ldrimage.h"
+#include "gui/imageframe.h"
+#include <QList>
 namespace Ui {
 class MainWindow;
 }
@@ -20,19 +22,28 @@ class MainWindow : public QMainWindow
     QVBoxLayout * scrollImagesLayout;
 
 public:
-    QLabel * loadedBigImage;
+    ImageFrame * loadedBigImage;
     QLabel * imageExifInfo;
     explicit MainWindow(QWidget *parent = 0);
+    void addImages(std::string filename);
+    void resizeEvent(QResizeEvent* event);
+    string int2String(int value);
+    string double2String(double val);
     ~MainWindow();
 
 private:
     Ui::MainWindow *ui;
     QAction * openFileAct;
+    QAction * cameraSettingsAct;
     QMenu * fileMenu;
+    QMenu * cameraMenu;
+    QList<ImageFrame *> imageList;
 
 private slots:
     void openFile();
+    void openCameraSettingsDialog();
     void switchPage();
+    void changeBigImage(ImageFrame *frame);
 };
 
 #endif // MAINWINDOW_H

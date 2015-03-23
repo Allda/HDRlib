@@ -55,7 +55,9 @@ SOURCES += main.cpp \
     multiexposureCamera/camera_viewer.cpp \
     multiexposureCamera/load_configuration.cpp \
     multiexposureCamera/camera_controller.cpp \
-    gui/mainwindow.cpp
+    gui/mainwindow.cpp \
+    gui/imageframe.cpp \
+    gui/camerasettingsdialog.cpp
 
 HEADERS += \
     ldrimage.h \
@@ -78,7 +80,9 @@ HEADERS += \
     multiexposureCamera/camera_viewer.h \
     multiexposureCamera/load_configuration.h \
     multiexposureCamera/camera_controller.h \
-    gui/mainwindow.h
+    gui/mainwindow.h \
+    gui/imageframe.h \
+    gui/camerasettingsdialog.h
 
 FORMS    += gui/mainwindow.ui
 

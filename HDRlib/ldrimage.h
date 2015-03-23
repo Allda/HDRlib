@@ -7,6 +7,7 @@
 #include "opencv2/imgproc/imgproc_c.h"
 #include "opencv2/imgproc/imgproc.hpp"
 #include <string>
+#include <QImage>
 
 using namespace std;
 using namespace cv;
@@ -29,6 +30,9 @@ public:
     bool getExifInfo(const char * name);
     double getExposureTime();
     Vec3b getPixel(int x, int y);
+    QImage getQImage(int maxWidth, int maxHeight);
+    QImage getQImage();
+    QImage Mat2QImage(cv::Mat const& src);
 
 
 private:

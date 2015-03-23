@@ -20,7 +20,7 @@ MULTI_EXPOSURE_MODE = true
 # se nahravani ukonci klavesou Esc.
 NUMBER_OF_CAPTURED_FRAMES = 0
 
-CAMERA_GAIN = 120
+CAMERA_GAIN = 101
 
 CAMERA_OFFSET = 24
 
