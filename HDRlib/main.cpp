@@ -19,6 +19,9 @@
 #include "tonemapping/expoperator.h"
 #include "tonemapping/reinhardglobaloperator.h"
 
+#include <QApplication>
+#include "gui/mainwindow.h"
+
 #include <QDir>
 #include <QStringList>
 using namespace cv;
@@ -74,7 +77,10 @@ vector<LDRImage *> cameraInit(){
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+    QApplication a(argc, argv);
+
+    MainWindow w;
+    w.show();
 
     /*vector<LDRImage *> ldrImages =  cameraInit();
     deque<LDRImage *> ldrImages2;
@@ -89,7 +95,9 @@ int main(int argc, char *argv[])
     LDRImage * image3 = new LDRImage("img/3.JPG");*/
 
 
-    deque<LDRImage *> ldrImage = loadLDRImages(string("img/lampicka"),string("jpg"),15,1, true);
+    /*deque<LDRImage *> ldrImage = loadLDRImages(string("img/chram"),string("jpg"),3,1, false);
+
+
 
     HDRCreator * hdr = new HDRCreator(ldrImage);
 
@@ -121,7 +129,7 @@ int main(int argc, char *argv[])
     ReinhardGlobalOperator * op = new ReinhardGlobalOperator(out);
     LDRImage * outputLDR = op->process();
     //cout << outputLDR->getImageMat();
-    outputLDR->showImage();
+    outputLDR->showImage();*/
 
 
     return a.exec();

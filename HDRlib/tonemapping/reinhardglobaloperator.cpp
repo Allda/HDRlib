@@ -30,11 +30,14 @@ LDRImage * ReinhardGlobalOperator::process(){
 
     Mat LMat = Mat(height,width,CV_32FC3);
     Mat output = Mat(height,width, CV_8UC3);
+    double min, max;
+    cv::minMaxLoc(image->getMat(), &min, &max);
     for(int x = 0; x < width; x++){
         for(int y = 0; y < height; y++){
             for(int ch = 0; ch < channels; ch++){
                 LMat.at<Vec3f>(y,x)[ch] = (0.72/Lw[ch]) * image->getMat().at<Vec3f>(y,x)[ch];
-                output.at<Vec3b>(y,x)[ch] = (LMat.at<Vec3f>(y,x)[ch]/(1+LMat.at<Vec3f>(y,x)[ch]))*255;
+                double numerator = LMat.at<Vec3f>(y,x)[ch] * (1+(LMat.at<Vec3f>(y,x)[ch]/(max*max)));
+                output.at<Vec3b>(y,x)[ch] = (numerator/(1+LMat.at<Vec3f>(y,x)[ch]))*255;
             }
         }
     }

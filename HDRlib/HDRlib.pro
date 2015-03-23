@@ -6,10 +6,12 @@
 
 QT       += core
 
-QT       -= gui
+QT       += gui
+
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = HDRlib
-CONFIG   += console
+CONFIG   -= console
 CONFIG   -= app_bundle
 
 TEMPLATE = app
@@ -45,7 +47,48 @@ SOURCES += main.cpp \
     tonemapping/linearoperator.cpp \
     tonemapping/logoperator.cpp \
     tonemapping/expoperator.cpp \
-    tonemapping/reinhardglobaloperator.cpp
+    tonemapping/reinhardglobaloperator.cpp \
+    multiexposureCamera/frame.cpp \
+    multiexposureCamera/multi_exposure_camera_thrd.cpp \
+    multiexposureCamera/multi_exposure_camera.cpp \
+    multiexposureCamera/frame_assembler.cpp \
+    multiexposureCamera/camera_viewer.cpp \
+    multiexposureCamera/load_configuration.cpp \
+    multiexposureCamera/camera_controller.cpp \
+    gui/mainwindow.cpp
+
+HEADERS += \
+    ldrimage.h \
+    hdrcreator.h \
+    weightfunction.h \
+    debevecmalikwf.h \
+    hdrimage.h \
+    exceptions/notenoughimagesexception.h \
+    exceptions/imagesizeexception.h \
+    tonemapping/tonemapping.h \
+    tonemapping/linearoperator.h \
+    tonemapping/logoperator.h \
+    tonemapping/expoperator.h \
+    tonemapping/reinhardglobaloperator.h \
+    multiexposureCamera/frame.hpp \
+    multiexposureCamera/multi_exposure_camera_thrd.h \
+    multiexposureCamera/multi_exposure_camera_common.h \
+    multiexposureCamera/multi_exposure_camera.h \
+    multiexposureCamera/frame_assembler.h \
+    multiexposureCamera/camera_viewer.h \
+    multiexposureCamera/load_configuration.h \
+    multiexposureCamera/camera_controller.h \
+    gui/mainwindow.h
+
+FORMS    += gui/mainwindow.ui
+
+
+OTHER_FILES += \
+    multiexposureCamera/TODO.txt \
+    multiexposureCamera/NOTE.txt \
+    multiexposureCamera/Binarni_struktura_paketu.txt \
+    multiexposureCamera/Readme.txt \
+    multiexposureCamera/configuration.txt
 
 
 win32 {
@@ -95,44 +138,7 @@ win32 {
     DEFINES += win32
 }
 
-HEADERS += \
-    ldrimage.h \
-    hdrcreator.h \
-    weightfunction.h \
-    debevecmalikwf.h \
-    hdrimage.h \
-    exceptions/notenoughimagesexception.h \
-    exceptions/imagesizeexception.h \
-    tonemapping/tonemapping.h \
-    tonemapping/linearoperator.h \
-    tonemapping/logoperator.h \
-    tonemapping/expoperator.h \
-    tonemapping/reinhardglobaloperator.h
 
 
 
-SOURCES += multiexposureCamera/frame.cpp \
-    multiexposureCamera/multi_exposure_camera_thrd.cpp \
-    multiexposureCamera/multi_exposure_camera.cpp \
-    multiexposureCamera/frame_assembler.cpp \
-    multiexposureCamera/camera_viewer.cpp \
-    multiexposureCamera/load_configuration.cpp \
-    multiexposureCamera/camera_controller.cpp
-
-HEADERS += \
-    multiexposureCamera/frame.hpp \
-    multiexposureCamera/multi_exposure_camera_thrd.h \
-    multiexposureCamera/multi_exposure_camera_common.h \
-    multiexposureCamera/multi_exposure_camera.h \
-    multiexposureCamera/frame_assembler.h \
-    multiexposureCamera/camera_viewer.h \
-    multiexposureCamera/load_configuration.h \
-    multiexposureCamera/camera_controller.h
-
-OTHER_FILES += \
-    multiexposureCamera/TODO.txt \
-    multiexposureCamera/NOTE.txt \
-    multiexposureCamera/Binarni_struktura_paketu.txt \
-    multiexposureCamera/Readme.txt \
-    multiexposureCamera/configuration.txt
 
