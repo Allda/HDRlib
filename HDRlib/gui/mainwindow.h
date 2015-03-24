@@ -35,13 +35,21 @@ private:
     Ui::MainWindow *ui;
     QAction * openFileAct;
     QAction * cameraSettingsAct;
+    QAction * loadCameraImagesAct;
+    QAction * exitAct;
     QMenu * fileMenu;
     QMenu * cameraMenu;
     QList<ImageFrame *> imageList;
+    QGridLayout * loadImageLayout;
+    QLabel * imageListHeader;
+    void initMenu();
+    void initLoadPage();
 
 private slots:
     void openFile();
     void openCameraSettingsDialog();
+    void importCameraImages();
+    void exit();
     void switchPage();
     void changeBigImage(ImageFrame *frame);
 };

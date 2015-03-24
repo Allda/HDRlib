@@ -15,7 +15,6 @@ LDRImage::LDRImage(cv::Mat mat, double exposureTime)
 
 }
 LDRImage::LDRImage(const char * name){
-    cout << "nahravam " << name << endl;
     mat = imread(name, CV_LOAD_IMAGE_COLOR);   // Read the file
     if(!mat.data){
         cout << "Nepodarilo se nahrat data" << endl;
@@ -23,7 +22,6 @@ LDRImage::LDRImage(const char * name){
     width = mat.cols;
     height = mat.rows;
     this->getExifInfo(name);
-    cout << exposureTime << endl;
 }
 
 LDRImage::LDRImage(Mat mat){
@@ -56,8 +54,6 @@ bool LDRImage::getExifInfo(const char * name){
     Exiv2::ExifData &exifData = image->exifData();
     exposureTime = exifData["Exif.Photo.ExposureTime"].toFloat();
     dateTime = exifData["Exif.Image.DateTime"].toString();
-
-
     return true;
 }
 

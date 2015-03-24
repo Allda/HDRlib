@@ -39,7 +39,7 @@ LDRImage * ImageFrame::getLDRImage(){
 }
 
 void ImageFrame::setBorder(){
-    this->setStyleSheet("border: 3px solid black");
+    this->setStyleSheet("border: 3px solid #AAA");
 }
 
 void ImageFrame::clearBorder(){

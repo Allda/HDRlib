@@ -17,6 +17,19 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    initMenu();
+
+    initLoadPage();
+
+
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+void MainWindow::initMenu(){
     openFileAct = new QAction(tr("&Open file"),this);
     connect(openFileAct,SIGNAL(triggered()),this,SLOT(openFile()));
     fileMenu = menuBar()->addMenu(tr("&File"));
@@ -25,9 +38,16 @@ MainWindow::MainWindow(QWidget *parent) :
     cameraMenu = menuBar()->addMenu(tr("&Camera"));
     cameraMenu->addAction(cameraSettingsAct);
     connect(cameraSettingsAct,SIGNAL(triggered()),this,SLOT(openCameraSettingsDialog()));
+    loadCameraImagesAct = new QAction(tr("&Import camera images"),this);
+    fileMenu->addAction(loadCameraImagesAct);
+    connect(loadCameraImagesAct,SIGNAL(triggered()), this, SLOT(importCameraImages()));
+    exitAct = new QAction(tr("&Exit"), this);
+    fileMenu->addAction(exitAct);
+    connect(exitAct,SIGNAL(triggered()), this, SLOT(exit()));
+}
 
-    QGridLayout * loadImageLayout = new QGridLayout(ui->loadImagePage);
-
+void MainWindow::initLoadPage(){
+    loadImageLayout = new QGridLayout(ui->loadImagePage);
 
     loadedImageScrollArea = new QScrollArea(ui->loadImagePage);
     loadedImageScrollArea->setMaximumSize(QSize(250, 16777215));
@@ -41,6 +61,8 @@ MainWindow::MainWindow(QWidget *parent) :
     scrollImagesLayout->setSpacing(6);
     scrollImagesLayout->setAlignment(scrollAreaWidgetContents, Qt::AlignCenter);
 
+    imageListHeader = new QLabel("Image list",ui->loadImagePage);
+
     loadedImageScrollArea->setWidget(scrollAreaWidgetContents);
 
     loadedBigImage = new ImageFrame(NULL, ui->loadImagePage,false);
@@ -51,36 +73,31 @@ MainWindow::MainWindow(QWidget *parent) :
 
     loadedBigImage->setText("File >> Open photo  -  to add photo");
     loadedBigImage->setAlignment(Qt::AlignCenter);
-    //QSizePolicy sizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
-    //loadedBigImage->setSizePolicy(sizePolicy);
 
-    loadImageLayout->addWidget(nextButton,1,1,1,1);
-    loadImageLayout->addWidget(loadedImageScrollArea,0,1,1,1);
-    loadImageLayout->addWidget(loadedBigImage,0,0,1,1);
-    loadImageLayout->addWidget(imageExifInfo,1,0,1,1);
+    loadImageLayout->addWidget(nextButton,2,1,1,1);
+    loadImageLayout->addWidget(loadedImageScrollArea,1,1);
+    loadImageLayout->addWidget(loadedBigImage,0,0,2,1);
+    loadImageLayout->addWidget(imageExifInfo,2,0);
+    loadImageLayout->addWidget(imageListHeader,0,1);
 
     connect(nextButton,SIGNAL(clicked()),this,SLOT(switchPage()));
-
-
-}
-
-MainWindow::~MainWindow()
-{
-    delete ui;
 }
 
 void MainWindow::addImages(std::string filename){
     LDRImage * ldrImage = new LDRImage(filename.c_str());
-
     ImageFrame * frame = new ImageFrame(ldrImage);
     connect(frame,SIGNAL(clicked(ImageFrame *)),this,SLOT(changeBigImage(ImageFrame *)));
+    // first image = set border, set as bigImage
     if(imageList.size() == 0)
         emit frame->clicked(frame);
     imageList.append(frame);
-    QImage qimage = ldrImage->getQImage(230,200);
 
+    frame->setCursor(Qt::PointingHandCursor);
+
+    QImage qimage = ldrImage->getQImage(230,200);
     frame->setPixmap(QPixmap::fromImage(qimage));
     frame->setMaximumSize(qimage.width(),qimage.height());
+    frame->setAlignment(Qt::AlignCenter);
 
     scrollImagesLayout->addWidget(frame);
 
@@ -89,13 +106,12 @@ void MainWindow::addImages(std::string filename){
 void MainWindow::openFile(){
     QFileDialog dialog(this);
     dialog.setFileMode(QFileDialog::ExistingFiles);
-    //dialog.setNameFilter(trUtf8("Splits (*.000 *.001)"));
     QStringList fileNames;
     if (dialog.exec())
         fileNames = dialog.selectedFiles();
-    //QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "", tr("Files (*.*)"));
+
     for(int i = 0; i < fileNames.length();i++){
-    addImages(fileNames[i].toUtf8().constData());
+        addImages(fileNames[i].toUtf8().constData());
     }
 
 }
@@ -147,8 +163,7 @@ void MainWindow::resizeEvent(QResizeEvent* event)
        int height = loadedBigImage->height();
        loadedBigImage->setPixmap(QPixmap::fromImage(ldrImage->getQImage(width-30,height-30)));
    }
-   /*ui->tabWidget->setGeometry(QRect(10, 10, this->width()-30, this->height()-80));
-   ui->tab->centralWidget->setGeometry(QRect(0,0,this->width()-35,this->height()-120));*/
+
 }
 
 string MainWindow::int2String(int value){
@@ -166,4 +181,12 @@ void MainWindow::openCameraSettingsDialog(){
     CameraSettingsDialog * camDialog = new CameraSettingsDialog();
     camDialog->setModal(true);
     camDialog->show();
+}
+
+void MainWindow::importCameraImages(){
+
+}
+
+void MainWindow::exit(){
+    this->close();
 }
