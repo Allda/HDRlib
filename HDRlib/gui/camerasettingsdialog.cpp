@@ -132,7 +132,6 @@ void CameraSettingsDialog::loadConfigData(){
           }
 
        }
-       std::cout << wholeFileText.toStdString() << std::endl;
        inputFile.close();
     }
 }
@@ -172,7 +171,6 @@ void CameraSettingsDialog::submitClickSlot(){
           }
           wholeFileText += line + "\n";
        }
-       std::cout << wholeFileText.toStdString() << std::endl;
        inputFile.seek(0); // go to the beginning of the file
        inputFile.write(wholeFileText.toUtf8()); // write the new text back to the file*/
        inputFile.close();

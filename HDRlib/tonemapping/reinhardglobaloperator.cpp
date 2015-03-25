@@ -19,13 +19,11 @@ LDRImage * ReinhardGlobalOperator::process(){
         for(int y = 0; y < height;y++){
             for(int ch = 0; ch < channels;ch++){
                 Lw[ch] += log(image->getMat().at<Vec3f>(y,x)[ch] + delta);
-                //cout << Lw[ch] << endl;
             }
         }
     }
     for(int i = 0; i < 3; i++){
         Lw[i] = exp((1/count)*Lw[i]);
-        cout << Lw[i] << " " <<  1/count *Lw[i] << " " << exp((1/count)*Lw[i]) << endl;
     }
 
     Mat LMat = Mat(height,width,CV_32FC3);
@@ -41,7 +39,6 @@ LDRImage * ReinhardGlobalOperator::process(){
             }
         }
     }
-    //cout << output << endl;
     return new LDRImage(output);
 }
 

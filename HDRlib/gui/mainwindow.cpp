@@ -9,7 +9,10 @@
 #include <iostream>
 #include "gui/imageframe.h"
 #include "gui/camerasettingsdialog.h"
+#include "gui/buildhdrthread.h"
 #include <QMessageBox>
+#include "tonemapping/reinhardglobaloperator.h"
+#include <QSpacerItem>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -20,7 +23,11 @@ MainWindow::MainWindow(QWidget *parent) :
     initMenu();
 
     initLoadPage();
-
+    initGenerateHDRpage();
+    statusBarText = new QLabel("");
+    statusBarText->setStyleSheet("border: none");
+    ui->statusBar->addWidget(statusBarText);
+    ui->stackedWidget->setCurrentIndex(1);
 
 }
 
@@ -83,6 +90,98 @@ void MainWindow::initLoadPage(){
     connect(nextButton,SIGNAL(clicked()),this,SLOT(switchPage()));
 }
 
+void MainWindow::initGenerateHDRpage(){
+    generateHDRlayout =  new QGridLayout(ui->generateHDRpage);
+
+    tonemappingScrollArea = new QScrollArea(ui->generateHDRpage);
+    tonemappingScrollArea->setMaximumSize(QSize(250, 16777215));
+    tonemappingScrollArea->setMinimumWidth(276);
+    tonemappingScrollArea->setWidgetResizable(true);
+    tonemappingWidgetContents = new QWidget();
+    tonemappingWidgetContents->setGeometry(QRect(0, 0, 248, 0));
+
+    QVBoxLayout * boxLayout = new QVBoxLayout(tonemappingWidgetContents);
+    QWidget * topPart = new QWidget(tonemappingWidgetContents);
+    boxLayout->addWidget(topPart);
+    QSpacerItem * spacer =  new QSpacerItem(1,1,QSizePolicy::Fixed,QSizePolicy::Expanding);
+    boxLayout->addSpacerItem(spacer);
+
+    tonemappingLayout = new QGridLayout(topPart);
+    tonemappingLayout->setContentsMargins(11, 11, 11, 11);
+    tonemappingLayout->setSpacing(6);
+    tonemappingLayout->setAlignment(tonemappingWidgetContents, Qt::AlignCenter);
+
+    tonemappingScrollArea->setWidget(tonemappingWidgetContents);
+
+    QPushButton * backButton = new QPushButton("Back",ui->generateHDRpage);
+    generateButton = new QPushButton("Start tone mapping", ui->generateHDRpage);
+    generateButton->setEnabled(false);
+
+    finalImage = new ImageFrame(NULL, ui->generateHDRpage,false);
+    finalImage->setAlignment(Qt::AlignCenter);
+    finalImage->setBorder();
+    //tonemappingScrollArea->setStyleSheet("border: 3px solid white");
+    generateHDRlayout->addWidget(tonemappingScrollArea,1,0,1,1);
+    generateHDRlayout->addWidget(backButton,0,0);
+    generateHDRlayout->addWidget(generateButton,2,0);
+    generateHDRlayout->addWidget(finalImage,0,2,3,1);
+
+    connect(backButton,SIGNAL(clicked()),this,SLOT(switchPage()));
+    connect(generateButton,SIGNAL(clicked()),this,SLOT(toneMapping()));
+
+    radioGroup = new QButtonGroup(tonemappingWidgetContents);
+    linearMappingRadio = new QRadioButton("Linear mapping", tonemappingWidgetContents);
+    logMappingRadio = new QRadioButton("Logarithmic mapping", tonemappingWidgetContents);
+    expMappingRadio = new QRadioButton("Exponencial mapping", tonemappingWidgetContents);
+    reinhardMappingRadio = new QRadioButton("Reinhard mapping", tonemappingWidgetContents);
+    radioGroup->addButton(linearMappingRadio);
+    radioGroup->addButton(logMappingRadio);
+    radioGroup->addButton(expMappingRadio);
+    radioGroup->addButton(reinhardMappingRadio);
+
+    QLabel * logQ = new QLabel("Q:", tonemappingWidgetContents);
+    logQ->setStyleSheet("margin-left:30px");
+    QLabel * logK = new QLabel("K:", tonemappingWidgetContents);
+    logK->setStyleSheet("margin-left:30px");
+    logQslider = new QSlider(Qt::Horizontal,tonemappingWidgetContents);
+    logQVal = new QLabel("0",tonemappingWidgetContents);
+    connect(logQslider,SIGNAL(valueChanged(int)),logQVal, SLOT(setNum(int)));
+    logKslider = new QSlider(Qt::Horizontal,tonemappingWidgetContents);
+    logKVal = new QLabel(tonemappingWidgetContents);
+    connect(logKslider,SIGNAL(valueChanged(int)),logKVal, SLOT(setNum(int)));
+
+    QLabel * expQ = new QLabel("Q:", tonemappingWidgetContents);
+    QLabel * expK = new QLabel("K:", tonemappingWidgetContents);
+    expQ->setStyleSheet("margin-left:30px");
+    expK->setStyleSheet("margin-left:30px");
+    expQslider = new QSlider(Qt::Horizontal,tonemappingWidgetContents);
+    expQVal = new QLabel(tonemappingWidgetContents);
+    connect(expQslider,SIGNAL(valueChanged(int)),expQVal, SLOT(setNum(int)));
+    expKslider = new QSlider(Qt::Horizontal,tonemappingWidgetContents);
+    expKVal = new QLabel(tonemappingWidgetContents);
+    connect(expKslider,SIGNAL(valueChanged(int)),expKVal, SLOT(setNum(int)));
+
+
+
+    tonemappingLayout->addWidget(linearMappingRadio,0,0,1,3);
+    tonemappingLayout->addWidget(logMappingRadio,1,0,1,3);
+    tonemappingLayout->addWidget(logQ,2,0);
+    tonemappingLayout->addWidget(logQslider,2,1);
+    tonemappingLayout->addWidget(logQVal,2,2);
+    tonemappingLayout->addWidget(logK,3,0);
+    tonemappingLayout->addWidget(logKslider,3,1);
+    tonemappingLayout->addWidget(logKVal,3,2);
+    tonemappingLayout->addWidget(expMappingRadio,4,0,1,3);
+    tonemappingLayout->addWidget(expQ,5,0);
+    tonemappingLayout->addWidget(expQslider,5,1);
+    tonemappingLayout->addWidget(expQVal,5,2);
+    tonemappingLayout->addWidget(expK,6,0);
+    tonemappingLayout->addWidget(expKslider,6,1);
+    tonemappingLayout->addWidget(expKVal,6,2);
+    tonemappingLayout->addWidget(reinhardMappingRadio,7,0,1,3);
+    //tonemappingLayout->addSpace (spacer,8,0);
+}
+
 void MainWindow::addImages(std::string filename){
     LDRImage * ldrImage = new LDRImage(filename.c_str());
     ImageFrame * frame = new ImageFrame(ldrImage);
@@ -127,8 +226,18 @@ void MainWindow::switchPage(){
             msgBox.setIcon(QMessageBox::Warning);
             msgBox.exec();
         }
-        else
+        else{
             ui->stackedWidget->setCurrentIndex(1);
+            hdr->setWeightFunction(wf);
+            hdr->addVector(getLDRImageList());
+            thread = new BuildHDRThread();
+            thread->addHDRcreator(hdr);
+            thread->addResult(hdrImage);
+            connect(thread,SIGNAL(finished()), this, SLOT(HDRdone()));
+            thread->start();
+            statusBarText->setText("Building HDR...");
+
+        }
     }
     else{
         ui->stackedWidget->setCurrentIndex(0);
@@ -155,14 +264,19 @@ void MainWindow::changeBigImage(ImageFrame * frame){
 
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
-   QMainWindow::resizeEvent(event);
-
-   if(loadedBigImage->getLDRImage() != NULL){
-       LDRImage * ldrImage = loadedBigImage->getLDRImage();
-       int width = loadedBigImage->width();
-       int height = loadedBigImage->height();
-       loadedBigImage->setPixmap(QPixmap::fromImage(ldrImage->getQImage(width-30,height-30)));
-   }
+    QMainWindow::resizeEvent(event);
+    if(loadedBigImage->getLDRImage() != NULL){
+        LDRImage * ldrImage = loadedBigImage->getLDRImage();
+        int width = loadedBigImage->width();
+        int height = loadedBigImage->height();
+        loadedBigImage->setPixmap(QPixmap::fromImage(ldrImage->getQImage(width-30,height-30)));
+    }
+    if(finalImage->getLDRImage() != NULL){
+        LDRImage * ldrImage = finalImage->getLDRImage();
+        int width = finalImage->width();
+        int height = finalImage->height();
+        finalImage->setPixmap(QPixmap::fromImage(ldrImage->getQImage(width-30,height-30)));
+    }
 
 }
 
@@ -189,4 +303,52 @@ void MainWindow::importCameraImages(){
 
 void MainWindow::exit(){
     this->close();
+}
+
+vector<LDRImage *> MainWindow::getLDRImageList(){
+    ldrImageList.clear();
+    for(int i = 0; i< imageList.size();i++){
+        ldrImageList.push_back(imageList.at(i)->getLDRImage());
+    }
+    return ldrImageList;
+}
+
+void MainWindow::HDRdone(){
+    this->hdrImage = thread->getHDRimage();
+    delete thread;
+    statusBarText->setText("HDR done");
+    generateButton->setEnabled(true);
+}
+
+void MainWindow::toneMapping(){
+    LDRImage * finalLDRimage;
+    statusBarText->setText("Tonemapping...");
+    if(linearMappingRadio->isChecked()){
+        LinearOperator * linOp = new LinearOperator(hdrImage);
+        finalLDRimage = linOp->process();
+    }
+    else if(logMappingRadio->isChecked()){
+        LogOperator * logOp = new LogOperator(hdrImage);
+        double q,k;
+        q = logQslider->value() * 0.01;
+        k = logKslider->value() * 0.01;
+        finalLDRimage = logOp->process(q,k);
+    }
+    else if(expMappingRadio->isChecked()){
+        ExpOperator * expOp = new ExpOperator(hdrImage);
+        double q,k;
+        q = expQslider->value() * 0.01;
+        k = expKslider->value() * 0.01;
+        finalLDRimage = expOp->process(q,k);
+    }
+    else if(reinhardMappingRadio->isChecked()){
+        ReinhardGlobalOperator * reinhardOp = new ReinhardGlobalOperator(hdrImage);
+        finalLDRimage = reinhardOp->process();
+    }
+
+    int width = finalImage->width();
+    int height = finalImage->height();
+    finalImage->setLDRImage(finalLDRimage);
+    finalImage->setPixmap(QPixmap::fromImage(finalLDRimage->getQImage(width-30,height-30)));
+    statusBarText->setText("Tonemapping done");
 }

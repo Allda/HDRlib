@@ -160,7 +160,6 @@ bool CameraController::capture( bool is_view )
         }
 
         img_id = p_frame->camImgID();
-        //std::cout << "frame id: " << img_id << std::endl;
 
         if ( mp_configuration->isHalfFrame() )
             p_frame->cutHalfFrame();
@@ -357,7 +356,6 @@ std::vector<LDRImage *> CameraController::getImages()
         // catch first frame from sequence
         if((img_id-1)%3 == 0 && startCapturing == false){
             startCapturing = true;
-            std::cout <<"id: " << img_id <<" " << index << std::endl;
             index = 1;
             double exposureValue = mp_configuration->getExposureValue(exposureIDHistory[img_id]);
             LDRImage * ldrImage = new LDRImage(orig_frame,exposureValue*0.000001);
@@ -365,7 +363,6 @@ std::vector<LDRImage *> CameraController::getImages()
         }
 
         if(startCapturing && (img_id-1)%3==index){
-            std::cout <<"id: " << img_id <<" " << index << std::endl;
             index++;
             double exposureValue = mp_configuration->getExposureValue(exposureIDHistory[img_id]);
             LDRImage * ldrImage = new LDRImage(orig_frame,exposureValue*0.000001);
@@ -449,12 +446,7 @@ bool CameraController::loadConfiguration( const char * p_configuration_file )
 {
     bool result;
     result = mp_configuration->load( p_configuration_file );
-    /*
-    std::cout << "Camera ip: " << mp_configuration->cameraIP()->c_str() << std::endl;
-    std::cout << "Local ip: " << mp_configuration->localIP()->c_str() << std::endl;
-    std::cout << "Port: " << mp_configuration->port() << std::endl;
-    */
-    std::cout << "Action: " << mp_configuration->cameraAction() << std::endl;
+
     return result;
 }
 

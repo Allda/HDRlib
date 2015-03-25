@@ -11,12 +11,16 @@ HDRCreator::HDRCreator()
 
 }
 
-HDRCreator::HDRCreator(deque<LDRImage *> imageList){
+HDRCreator::HDRCreator(vector<LDRImage *> imageList){
     this->imageList = imageList;
 }
 
 void HDRCreator::addImage(LDRImage *i){
     imageList.push_back(i);
+}
+
+void HDRCreator::addVector(vector<LDRImage *> imageList){
+    this->imageList = imageList;
 }
 
 void HDRCreator::setWeightFunction(WeightFunction *wf){

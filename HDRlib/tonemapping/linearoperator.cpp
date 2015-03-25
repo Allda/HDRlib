@@ -13,7 +13,6 @@ LDRImage * LinearOperator::process(){
     int height = image->getMat().rows;
     int channels = image->getMat().channels();
     cv::minMaxLoc(image->getMat(), &min, &max);
-    cout << "MIN: " << min << " MAX: " <<max << endl;
     double e = 255/max;
     Mat output = Mat(height,width,CV_8UC3,Scalar(0,0,0));
     for(int x = 0; x < width;x++){

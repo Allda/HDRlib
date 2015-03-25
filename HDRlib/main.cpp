@@ -36,7 +36,6 @@ deque<LDRImage *> loadLDRImages(string name, string extension, int count, int st
             fileName = name + "0" +to_string(start++) + "." + extension;
         else
             fileName = name + to_string(start++) + "." + extension;
-        cout << fileName << endl;
         LDRImage * ldrImage = new LDRImage(fileName.c_str());
         d.push_back(ldrImage);
     }
@@ -67,7 +66,6 @@ vector<LDRImage *> cameraInit(){
 
     for(unsigned i = 0; i < ldrImageList.size();i++){
         LDRImage * ldrImage = ldrImageList.at(i);
-        cout << ldrImage->getExposureTime() <<endl;
         ldrImage->showImage();
     }
     return ldrImageList;
@@ -105,13 +103,10 @@ int main(int argc, char *argv[])
 
 
     hdr->setWeightFunction(wf);
-    cout << wf->getWeight(8) << endl;
 
     HDRImage * out;
     try{
         out = hdr->buildHDR();
-        //cout << "Done" << endl;
-        //cout << out.getMat() << endl;
         namedWindow( "Display window", CV_WINDOW_NORMAL | CV_WINDOW_KEEPRATIO );// Create a window for display.
         imshow( "Display window", out->getMat() );                   // Show our image inside it.
     }
@@ -128,7 +123,6 @@ int main(int argc, char *argv[])
 
     ReinhardGlobalOperator * op = new ReinhardGlobalOperator(out);
     LDRImage * outputLDR = op->process();
-    //cout << outputLDR->getImageMat();
     outputLDR->showImage();*/
 
 

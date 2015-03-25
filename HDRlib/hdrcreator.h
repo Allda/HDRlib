@@ -15,7 +15,8 @@ class HDRCreator
 {
 public:
     HDRCreator();
-    HDRCreator(deque<LDRImage *> imageList);
+    HDRCreator(vector<LDRImage *> imageList);
+    void addVector(vector<LDRImage *> imageList);
     void addImage(LDRImage * i);
     void setWeightFunction(WeightFunction * wf);
     HDRImage *buildHDR();
@@ -23,7 +24,7 @@ public:
     ~HDRCreator();
 
 private:
-    deque<LDRImage *> imageList;
+    vector<LDRImage *> imageList;
     Mat output;
     WeightFunction * wf = NULL;
     double table[256];
