@@ -7,6 +7,7 @@ ImageFrame::ImageFrame(LDRImage *ldrImage , QWidget *parent, bool clickable)
 {
     this->ldrImage = ldrImage;
     this->clickable = clickable;
+    active = false;
     if(clickable){
         setStyleSheet("border: 3px solid white");
         connect(this, SIGNAL(clicked(ImageFrame*)),this,SLOT(slotClicked()));
@@ -26,12 +27,14 @@ void ImageFrame::mousePressEvent ( QMouseEvent * event )
 {
     if(clickable){
         emit clicked(this);
+        active = true;
         setBorder();
     }
 }
 
 void ImageFrame::slotClicked(){
     setBorder();
+
 }
 
 LDRImage * ImageFrame::getLDRImage(){
@@ -39,10 +42,16 @@ LDRImage * ImageFrame::getLDRImage(){
 }
 
 void ImageFrame::setBorder(){
-    this->setStyleSheet("border: 3px solid #AAA");
+    active = true;
+    this->setStyleSheet("border: 3px solid #A00");
 }
 
 void ImageFrame::clearBorder(){
     this->setStyleSheet("border: 3px solid white");
+    active = false;
+}
+
+bool ImageFrame::isActive(){
+    return active;
 }
 

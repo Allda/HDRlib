@@ -14,9 +14,11 @@ public:
     void setLDRImage(LDRImage * ldrImage);
     void setBorder();
     void clearBorder();
+    bool isActive();
 private:
     LDRImage * ldrImage;
     bool clickable;
+    bool active;
 signals:
     void clicked(ImageFrame * frame);
 

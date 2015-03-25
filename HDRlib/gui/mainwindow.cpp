@@ -13,6 +13,7 @@
 #include <QMessageBox>
 #include "tonemapping/reinhardglobaloperator.h"
 #include <QSpacerItem>
+#include <QProgressDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -26,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
     initGenerateHDRpage();
     initStyleSheet();
     ui->statusBar->showMessage("Nejaky text",10000);
-    ui->stackedWidget->setCurrentIndex(1);
+    ui->stackedWidget->setCurrentIndex(0);
 
 }
 
@@ -36,7 +37,9 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::initStyleSheet(){
-    this->setStyleSheet("background-color: #444; color: #fff");
+    this->setObjectName("main");
+    //this->setStyleSheet("background-color: #444; color: #fff");
+    this->setStyleSheet("* {background-color: #444; color: #fff} QPushButton{background-color:#777; font-weight:bold} QPushButton:disabled{color:#aaa}");
     ui->menuBar->setStyleSheet("background-color: #2D2D2D;");
     ui->statusBar->setStyleSheet("background-color: #2D2D2D;");
     //scrollAreaWidgetContents->setStyleSheet("border: 2px solid #fff");
@@ -46,6 +49,7 @@ void MainWindow::initStyleSheet(){
     tonemappingWidgetContents->setStyleSheet("#tonemappingWidget{border: 2px solid #fff}");
     finalImage->setStyleSheet("background-color: #555");
     imageExifInfo->setStyleSheet("background-color:#666;");
+    ui->menuBar->setStyleSheet("QMenu::item:selected{background:#a00} QMenu::item:disabled{color:#AAA} QMenuBar{background-color:2D2D2D}");
 }
 
 void MainWindow::initMenu(){
@@ -66,6 +70,11 @@ void MainWindow::initMenu(){
     saveHDRAct = new QAction(tr("&Save as HDR"),this);
     fileMenu->addAction(saveHDRAct);
     connect(saveHDRAct,SIGNAL(triggered()),this,SLOT(saveHDR()));
+    exportAct = new QAction(tr("&Export image"),this);
+    fileMenu->addAction(exportAct);
+    connect(exportAct, SIGNAL(triggered()),this,SLOT(exportImage()));
+    exportAct->setEnabled(false);
+    saveHDRAct->setEnabled(false);
 }
 
 void MainWindow::initLoadPage(){
@@ -92,15 +101,20 @@ void MainWindow::initLoadPage(){
     imageExifInfo->setStyleSheet("background-color:white;");
     QPushButton * nextButton = new QPushButton(ui->loadImagePage);
     nextButton->setText("Next");
+    QPushButton * deleteButton = new QPushButton("Delete", ui->loadImagePage);
+    deleteButton->setStyleSheet("background-color:#a00");
+    connect(deleteButton,SIGNAL(clicked()), this, SLOT(deleteImage()));
+
 
     loadedBigImage->setText("File >> Open photo  -  to add photo");
     loadedBigImage->setAlignment(Qt::AlignCenter);
 
-    loadImageLayout->addWidget(nextButton,2,1,1,1);
-    loadImageLayout->addWidget(loadedImageScrollArea,1,1);
-    loadImageLayout->addWidget(loadedBigImage,0,0,2,1);
-    loadImageLayout->addWidget(imageExifInfo,2,0);
+    loadImageLayout->addWidget(nextButton,3,1,1,1);
+    loadImageLayout->addWidget(loadedImageScrollArea,1,1,1,1);
+    loadImageLayout->addWidget(loadedBigImage,0,0,3,1);
+    loadImageLayout->addWidget(imageExifInfo,3,0);
     loadImageLayout->addWidget(imageListHeader,0,1);
+    loadImageLayout->addWidget(deleteButton,2,1);
 
     connect(nextButton,SIGNAL(clicked()),this,SLOT(switchPage()));
 }
@@ -134,6 +148,8 @@ void MainWindow::initGenerateHDRpage(){
 
     finalImage = new ImageFrame(NULL, ui->generateHDRpage,false);
     finalImage->setAlignment(Qt::AlignCenter);
+    finalImage->setSizePolicy(QSizePolicy ::Expanding , QSizePolicy ::Expanding );
+    finalImage->setMinimumSize(10,10);
     //finalImage->setBorder();
     //tonemappingScrollArea->setStyleSheet("border: 3px solid white");
     generateHDRlayout->addWidget(tonemappingScrollArea,1,0,1,1);
@@ -149,6 +165,7 @@ void MainWindow::initGenerateHDRpage(){
     logMappingRadio = new QRadioButton("Logarithmic mapping", tonemappingWidgetContents);
     expMappingRadio = new QRadioButton("Exponencial mapping", tonemappingWidgetContents);
     reinhardMappingRadio = new QRadioButton("Reinhard mapping", tonemappingWidgetContents);
+    linearMappingRadio->setChecked(true);
     radioGroup->addButton(linearMappingRadio);
     radioGroup->addButton(logMappingRadio);
     radioGroup->addButton(expMappingRadio);
@@ -162,7 +179,7 @@ void MainWindow::initGenerateHDRpage(){
     logQVal = new QLabel("0",tonemappingWidgetContents);
     connect(logQslider,SIGNAL(valueChanged(int)),logQVal, SLOT(setNum(int)));
     logKslider = new QSlider(Qt::Horizontal,tonemappingWidgetContents);
-    logKVal = new QLabel(tonemappingWidgetContents);
+    logKVal = new QLabel("0",tonemappingWidgetContents);
     connect(logKslider,SIGNAL(valueChanged(int)),logKVal, SLOT(setNum(int)));
 
     QLabel * expQ = new QLabel("Q:", tonemappingWidgetContents);
@@ -170,10 +187,10 @@ void MainWindow::initGenerateHDRpage(){
     expQ->setStyleSheet("margin-left:30px");
     expK->setStyleSheet("margin-left:30px");
     expQslider = new QSlider(Qt::Horizontal,tonemappingWidgetContents);
-    expQVal = new QLabel(tonemappingWidgetContents);
+    expQVal = new QLabel("0",tonemappingWidgetContents);
     connect(expQslider,SIGNAL(valueChanged(int)),expQVal, SLOT(setNum(int)));
     expKslider = new QSlider(Qt::Horizontal,tonemappingWidgetContents);
-    expKVal = new QLabel(tonemappingWidgetContents);
+    expKVal = new QLabel("0",tonemappingWidgetContents);
     connect(expKslider,SIGNAL(valueChanged(int)),expKVal, SLOT(setNum(int)));
 
 
@@ -198,6 +215,11 @@ void MainWindow::initGenerateHDRpage(){
 
 void MainWindow::addImages(std::string filename){
     LDRImage * ldrImage = new LDRImage(filename.c_str());
+    addImages(ldrImage);
+
+}
+
+void MainWindow::addImages(LDRImage *ldrImage){
     ImageFrame * frame = new ImageFrame(ldrImage);
     connect(frame,SIGNAL(clicked(ImageFrame *)),this,SLOT(changeBigImage(ImageFrame *)));
     // first image = set border, set as bigImage
@@ -213,7 +235,6 @@ void MainWindow::addImages(std::string filename){
     frame->setAlignment(Qt::AlignCenter);
 
     scrollImagesLayout->addWidget(frame);
-
 }
 
 void MainWindow::openFile(){
@@ -222,7 +243,7 @@ void MainWindow::openFile(){
     QStringList fileNames;
     if (dialog.exec())
         fileNames = dialog.selectedFiles();
-
+    ui->stackedWidget->setCurrentIndex(0);
     for(int i = 0; i < fileNames.length();i++){
         addImages(fileNames[i].toUtf8().constData());
     }
@@ -242,6 +263,8 @@ void MainWindow::switchPage(){
         }
         else{
             ui->stackedWidget->setCurrentIndex(1);
+            finalImage->clear();
+            generateButton->setEnabled(false);
             hdr->setWeightFunction(wf);
             hdr->addVector(getLDRImageList());
             thread = new BuildHDRThread();
@@ -255,13 +278,17 @@ void MainWindow::switchPage(){
     }
     else{
         ui->stackedWidget->setCurrentIndex(0);
+        exportAct->setEnabled(false);
+        saveHDRAct->setEnabled(false);
+        generateButton->setEnabled(true);
     }
 }
 
 void MainWindow::changeBigImage(ImageFrame * frame){
     for(int i = 0; i < imageList.size(); i++){
-        //imageList.at(i)->clearBorder();
+        imageList.at(i)->clearBorder();
     }
+    frame->setBorder();
     LDRImage * ldrImage = frame->getLDRImage();
     int width = loadedBigImage->width();
     int height = loadedBigImage->height();
@@ -286,10 +313,11 @@ void MainWindow::resizeEvent(QResizeEvent* event)
         loadedBigImage->setPixmap(QPixmap::fromImage(ldrImage->getQImage()).scaled(width-30,height-30,Qt::KeepAspectRatio));
     }
     if(finalImage->getLDRImage() != NULL){
+        finalImage->clear();
         LDRImage * ldrImage = finalImage->getLDRImage();
         int width = finalImage->width();
         int height = finalImage->height();
-        finalImage->setPixmap(QPixmap::fromImage(ldrImage->getQImage()).scaled(width-30,height-30,Qt::KeepAspectRatio));
+        finalImage->setPixmap(QPixmap::fromImage(ldrImage->getQImage()).scaled(width-30,height-30,Qt::KeepAspectRatio,Qt::SmoothTransformation));
     }
 
 }
@@ -312,6 +340,76 @@ void MainWindow::openCameraSettingsDialog(){
 }
 
 void MainWindow::importCameraImages(){
+    /*QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, "Input filter", "Use bayer filter?",
+                                QMessageBox::Yes|QMessageBox::No);
+    if (reply == QMessageBox::Yes) {
+
+    }
+    else {
+
+    }*/
+    int numTasks = 100;
+    QProgressDialog *  progress = new QProgressDialog("Task in progress...", "Cancel", 0, numTasks);
+    /*progress->setWindowModality(Qt::WindowModal);
+    progress->show();
+    //progress->setMinimumDuration(5000);
+    progress->setAutoClose(false);
+    //progress->setAutoClose(false);
+    for (int i = 0; i < numTasks; i+=25) {
+        progress->setValue(i);
+        if (progress->wasCanceled()){
+            break;
+        }
+        for(int j=0;j < 100000; j++)
+            std::cout << j << std::endl;
+        progress->setValue(numTasks);
+        if(i % 10 == 0) QApplication::processEvents();
+    }
+    progress->close();*/
+    CameraController camera_controller;
+    vector<LDRImage *> ldrImageList;
+
+    QMessageBox msgBox(this);
+
+    msgBox.setIcon(QMessageBox::Critical);
+    if ( ! camera_controller.loadConfiguration( "multiexposureCamera/configuration.txt" ) ){
+        msgBox.setText("Can't load config file                        ");
+        //msgBox.setInformativeText("Must contain at least 3 images");
+        msgBox.exec();
+        return;
+    }
+
+
+
+    if ( ! camera_controller.connectToCamera() ){
+        msgBox.setText("Unable to connect to the camera           ");
+        //msgBox.setInformativeText("Must contain at least 3 images");
+        msgBox.exec();
+        return;
+    }
+
+    if ( ! camera_controller.configureCamera() )
+        msgBox.setText("Unable to configure the camera           ");
+        //msgBox.setInformativeText("Must contain at least 3 images");
+        msgBox.exec();
+        return;
+
+    try{
+        ldrImageList = camera_controller.getImages();
+    }catch(exception e){
+            msgBox.setText("Unable to get images           ");
+            //msgBox.setInformativeText("Must contain at least 3 images");
+            msgBox.exec();
+            return;
+    }
+
+    for(unsigned i = 0; i < ldrImageList.size();i++){
+        LDRImage * ldrImage = ldrImageList.at(i);
+
+        ldrImage->showImage();
+    }
+
 
 }
 
@@ -332,10 +430,11 @@ void MainWindow::HDRdone(){
     delete thread;
     ui->statusBar->showMessage("HDR done",10000);
     generateButton->setEnabled(true);
+    saveHDRAct->setEnabled(true);
 }
 
 void MainWindow::toneMapping(){
-    LDRImage * finalLDRimage;
+
     ui->statusBar->showMessage("Tonemapping");
     if(linearMappingRadio->isChecked()){
         LinearOperator * linOp = new LinearOperator(hdrImage);
@@ -365,6 +464,7 @@ void MainWindow::toneMapping(){
     finalImage->setLDRImage(finalLDRimage);
     finalImage->setPixmap(QPixmap::fromImage(finalLDRimage->getQImage(width-30,height-30)));
     ui->statusBar->showMessage("Tonemapping done",10000);
+    exportAct->setEnabled(true);
 }
 
 void MainWindow::saveHDR(){
@@ -372,4 +472,30 @@ void MainWindow::saveHDR(){
                                ".",
                                tr("Images (*.png *.xpm *.jpg)"));
     std::cout << fileName.toStdString() << std::endl;
+}
+
+void MainWindow::exportImage(){
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
+                               ".",
+                               tr("Images (*.png *.jpg)"));
+    QFileInfo f(fileName);
+    if(f.suffix() == "")
+        fileName += ".jpg";
+    std::cout << fileName.toStdString() << std::endl;
+    imwrite(fileName.toStdString(),finalLDRimage->getImageMat());
+}
+
+void MainWindow::deleteImage(){
+    for(int i = 0; i < imageList.size();i++){
+        ImageFrame * frame = imageList.at(i);
+        if(frame->isActive()){
+            imageList.removeAt(i);
+            delete frame;
+            if(imageList.size() > 0){
+                emit imageList.at(0)->clicked(imageList.at(0));
+            }
+            else
+                loadedBigImage->clear();
+        }
+    }
 }

@@ -20,6 +20,7 @@
 #include "tonemapping/logoperator.h"
 #include "tonemapping/expoperator.h"
 #include "tonemapping/reinhardglobaloperator.h"
+#include "multiexposureCamera/camera_controller.h"
 namespace Ui {
 class MainWindow;
 }
@@ -38,6 +39,7 @@ public:
     QLabel * imageExifInfo;
     explicit MainWindow(QWidget *parent = 0);
     void addImages(std::string filename);
+    void addImages(LDRImage * ldrImage);
     void resizeEvent(QResizeEvent* event);
     string int2String(int value);
     string double2String(double val);
@@ -90,6 +92,7 @@ private:
     QSlider * expKslider;
     QLabel * expQVal;
     QLabel * expKVal;
+    LDRImage * finalLDRimage;
 
 
 private slots:
@@ -102,6 +105,8 @@ private slots:
     void HDRdone();
     void toneMapping();
     void saveHDR();
+    void exportImage();
+    void deleteImage();
 };
 
 #endif // MAINWINDOW_H
