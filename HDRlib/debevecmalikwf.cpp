@@ -6,8 +6,6 @@ using namespace std;
 DebevecMalikWF::DebevecMalikWF()
 {
     int min = 0, max = 255;
-    double avg = (min + max)/2;
-    cout << avg;
     for(int i = 0; i < 256;i++){
         if(0.5*255 > i){
             table[i] = (double)(i-min) ;

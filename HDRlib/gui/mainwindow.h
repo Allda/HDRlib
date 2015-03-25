@@ -49,6 +49,8 @@ private:
     QAction * cameraSettingsAct;
     QAction * loadCameraImagesAct;
     QAction * exitAct;
+    QAction * saveHDRAct;
+    QAction * exportAct;
     QMenu * fileMenu;
     QMenu * cameraMenu;
     QList<ImageFrame *> imageList;
@@ -64,6 +66,7 @@ private:
     void initMenu();
     void initLoadPage();
     void initGenerateHDRpage();
+    void initStyleSheet();
     vector<LDRImage *> getLDRImageList();
     HDRCreator * hdr = new HDRCreator();
     DebevecMalikWF * wf = new DebevecMalikWF();
@@ -98,6 +101,7 @@ private slots:
     void changeBigImage(ImageFrame *frame);
     void HDRdone();
     void toneMapping();
+    void saveHDR();
 };
 
 #endif // MAINWINDOW_H

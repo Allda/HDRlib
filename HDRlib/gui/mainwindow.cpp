@@ -24,9 +24,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     initLoadPage();
     initGenerateHDRpage();
-    statusBarText = new QLabel("");
-    statusBarText->setStyleSheet("border: none");
-    ui->statusBar->addWidget(statusBarText);
+    initStyleSheet();
+    ui->statusBar->showMessage("Nejaky text",10000);
     ui->stackedWidget->setCurrentIndex(1);
 
 }
@@ -34,6 +33,19 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::initStyleSheet(){
+    this->setStyleSheet("background-color: #444; color: #fff");
+    ui->menuBar->setStyleSheet("background-color: #2D2D2D;");
+    ui->statusBar->setStyleSheet("background-color: #2D2D2D;");
+    //scrollAreaWidgetContents->setStyleSheet("border: 2px solid #fff");
+    tonemappingWidgetContents->setObjectName("tonemappingWidget");
+    scrollAreaWidgetContents->setObjectName("tonemappingWidget");
+    scrollAreaWidgetContents->setStyleSheet("#tonemappingWidget{border: 2px solid #fff}");
+    tonemappingWidgetContents->setStyleSheet("#tonemappingWidget{border: 2px solid #fff}");
+    finalImage->setStyleSheet("background-color: #555");
+    imageExifInfo->setStyleSheet("background-color:#666;");
 }
 
 void MainWindow::initMenu(){
@@ -51,6 +63,9 @@ void MainWindow::initMenu(){
     exitAct = new QAction(tr("&Exit"), this);
     fileMenu->addAction(exitAct);
     connect(exitAct,SIGNAL(triggered()), this, SLOT(exit()));
+    saveHDRAct = new QAction(tr("&Save as HDR"),this);
+    fileMenu->addAction(saveHDRAct);
+    connect(saveHDRAct,SIGNAL(triggered()),this,SLOT(saveHDR()));
 }
 
 void MainWindow::initLoadPage(){
@@ -119,7 +134,7 @@ void MainWindow::initGenerateHDRpage(){
 
     finalImage = new ImageFrame(NULL, ui->generateHDRpage,false);
     finalImage->setAlignment(Qt::AlignCenter);
-    finalImage->setBorder();
+    //finalImage->setBorder();
     //tonemappingScrollArea->setStyleSheet("border: 3px solid white");
     generateHDRlayout->addWidget(tonemappingScrollArea,1,0,1,1);
     generateHDRlayout->addWidget(backButton,0,0);
@@ -179,7 +194,6 @@ void MainWindow::initGenerateHDRpage(){
     tonemappingLayout->addWidget(expKslider,6,1);
     tonemappingLayout->addWidget(expKVal,6,2);
     tonemappingLayout->addWidget(reinhardMappingRadio,7,0,1,3);
-    //tonemappingLayout->addSpace (spacer,8,0);
 }
 
 void MainWindow::addImages(std::string filename){
@@ -235,7 +249,7 @@ void MainWindow::switchPage(){
             thread->addResult(hdrImage);
             connect(thread,SIGNAL(finished()), this, SLOT(HDRdone()));
             thread->start();
-            statusBarText->setText("Building HDR...");
+            ui->statusBar->showMessage("Building HDR ...");
 
         }
     }
@@ -246,7 +260,7 @@ void MainWindow::switchPage(){
 
 void MainWindow::changeBigImage(ImageFrame * frame){
     for(int i = 0; i < imageList.size(); i++){
-        imageList.at(i)->clearBorder();
+        //imageList.at(i)->clearBorder();
     }
     LDRImage * ldrImage = frame->getLDRImage();
     int width = loadedBigImage->width();
@@ -269,13 +283,13 @@ void MainWindow::resizeEvent(QResizeEvent* event)
         LDRImage * ldrImage = loadedBigImage->getLDRImage();
         int width = loadedBigImage->width();
         int height = loadedBigImage->height();
-        loadedBigImage->setPixmap(QPixmap::fromImage(ldrImage->getQImage(width-30,height-30)));
+        loadedBigImage->setPixmap(QPixmap::fromImage(ldrImage->getQImage()).scaled(width-30,height-30,Qt::KeepAspectRatio));
     }
     if(finalImage->getLDRImage() != NULL){
         LDRImage * ldrImage = finalImage->getLDRImage();
         int width = finalImage->width();
         int height = finalImage->height();
-        finalImage->setPixmap(QPixmap::fromImage(ldrImage->getQImage(width-30,height-30)));
+        finalImage->setPixmap(QPixmap::fromImage(ldrImage->getQImage()).scaled(width-30,height-30,Qt::KeepAspectRatio));
     }
 
 }
@@ -316,13 +330,13 @@ vector<LDRImage *> MainWindow::getLDRImageList(){
 void MainWindow::HDRdone(){
     this->hdrImage = thread->getHDRimage();
     delete thread;
-    statusBarText->setText("HDR done");
+    ui->statusBar->showMessage("HDR done",10000);
     generateButton->setEnabled(true);
 }
 
 void MainWindow::toneMapping(){
     LDRImage * finalLDRimage;
-    statusBarText->setText("Tonemapping...");
+    ui->statusBar->showMessage("Tonemapping");
     if(linearMappingRadio->isChecked()){
         LinearOperator * linOp = new LinearOperator(hdrImage);
         finalLDRimage = linOp->process();
@@ -350,5 +364,12 @@ void MainWindow::toneMapping(){
     int height = finalImage->height();
     finalImage->setLDRImage(finalLDRimage);
     finalImage->setPixmap(QPixmap::fromImage(finalLDRimage->getQImage(width-30,height-30)));
-    statusBarText->setText("Tonemapping done");
+    ui->statusBar->showMessage("Tonemapping done",10000);
+}
+
+void MainWindow::saveHDR(){
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
+                               ".",
+                               tr("Images (*.png *.xpm *.jpg)"));
+    std::cout << fileName.toStdString() << std::endl;
 }
