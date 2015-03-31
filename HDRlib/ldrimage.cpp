@@ -32,6 +32,10 @@ Mat LDRImage::getImageMat(){
     return mat;
 }
 
+void LDRImage::setImageMat(Mat mat){
+    this->mat = mat;
+}
+
 void LDRImage::toString(){
     cout << "Width :" << width << endl
          << "Height: " << height << endl

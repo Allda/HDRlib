@@ -25,6 +25,7 @@ public:
     int getWidth();
     int getHeight();
     Mat getImageMat();
+    void setImageMat(Mat mat);
     void toString();
     void showImage();
     bool getExifInfo(const char * name);

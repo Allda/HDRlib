@@ -299,8 +299,12 @@ std::vector<LDRImage *> CameraController::getImages()
         for ( int i = 0; i < sequence_length; i++ ){
             p_sequence_image_id[i] = 10 + i;
             exposureIDHistory[p_sequence_image_id[i]] = p_sequence_config[i];
+            std::cout << p_sequence_image_id[i]<< " " << p_sequence_config[i] << std::endl;
         }
+
+
     }
+
 
 
     // Spuštění graberu na kameře
@@ -328,6 +332,11 @@ std::vector<LDRImage *> CameraController::getImages()
                                    p_sequence_config );
     }
 
+    /*cv::namedWindow( "Capturing", CV_WINDOW_NORMAL | CV_WINDOW_KEEPRATIO);
+    cv::namedWindow( "First", CV_WINDOW_NORMAL | CV_WINDOW_KEEPRATIO );
+    cv::namedWindow( "Second", CV_WINDOW_NORMAL | CV_WINDOW_KEEPRATIO );
+    cv::namedWindow( "Third", CV_WINDOW_NORMAL | CV_WINDOW_KEEPRATIO );*/
+    LDRImage * ldrImage;
 
     while( true )
     {
@@ -346,34 +355,81 @@ std::vector<LDRImage *> CameraController::getImages()
 
         img_id = p_frame->camImgID();
         // skip first 11 frames
-        if(img_id < 11)
-            continue;
+        if(img_id > 11){
+            cv::Mat orig_frame( p_frame->height(), p_frame->width(), CV_8UC1, p_frame->ptrData() );
 
 
+            //cv::imshow( "Capturing", orig_frame );
+            std::cout << img_id << std::endl;
 
-        cv::Mat orig_frame( p_frame->height(), p_frame->width(), CV_8UC1, p_frame->ptrData() );
+            // catch first frame from sequence
+            if((img_id-1)%3 == 0 ){
+                std::cout <<"First:" << img_id << std::endl;
+                //cv::imshow( "First", orig_frame );
+                startCapturing = true;
+                index = 1;
+                double exposureValue = mp_configuration->getExposureValue(exposureIDHistory[img_id]);
+                ldrImage = new LDRImage(orig_frame,exposureValue*0.000001);
+                //ldrImage->showImage();
+                ldrImageList.push_back(ldrImage);
+                /*LDRImage * ldrI = ldrImageList.at(ldrImageList.size()-1);
+                ldrI->showImage();*/
+            }
 
-        // catch first frame from sequence
-        if((img_id-1)%3 == 0 && startCapturing == false){
-            startCapturing = true;
-            index = 1;
-            double exposureValue = mp_configuration->getExposureValue(exposureIDHistory[img_id]);
-            LDRImage * ldrImage = new LDRImage(orig_frame,exposureValue*0.000001);
-            ldrImageList.push_back(ldrImage);
+            if((img_id-1)%3==1){
+                if(index == 1){
+                    cout << "Second " << img_id << std::endl;
+                    //cv::imshow( "Second", orig_frame );
+                    index++;
+                    double exposureValue = mp_configuration->getExposureValue(exposureIDHistory[img_id]);
+                    ldrImage = new LDRImage(orig_frame,exposureValue*0.000001);
+                    //ldrImage->showImage();
+                    ldrImageList.push_back(ldrImage);
+                    /*LDRImage * ldrI = ldrImageList.at(ldrImageList.size()-1);
+                    ldrI->showImage();*/
+                }
+            }
+            if((img_id-1)%3==2){
+                if(index == 2){
+                    cout << "Second " << img_id << std::endl;
+                    //cv::imshow( "Third", orig_frame );
+                    index++;
+                    double exposureValue = mp_configuration->getExposureValue(exposureIDHistory[img_id]);
+                    ldrImage = new LDRImage(orig_frame,exposureValue*0.000001);
+                    //ldrImage->showImage();
+                    ldrImageList.push_back(ldrImage);
+                    std::cout << "Size: " << ldrImageList.size() << std::endl;
+                    /*LDRImage * ldrI = ldrImageList.at(ldrImageList.size()-1);
+                    ldrI->showImage();*/
+                    /*for(unsigned i = 0; i < ldrImageList.size();i++){
+                        LDRImage * ldrI = ldrImageList.at(i);
+                        ldrI->showImage();
+                        std::cout << ldrImage->getExposureTime() << std::endl;
+                    }*/
+                    break;
+                }
+
+
+            }
+            /*if(index == 3){
+                for(int i = 0; i < ldrImageList.size();i++){
+                    LDRImage * img = ldrImageList.at(i);
+                    img->showImage();
+                }
+                break;
+            }*/
         }
 
-        if(startCapturing && (img_id-1)%3==index){
-            index++;
-            double exposureValue = mp_configuration->getExposureValue(exposureIDHistory[img_id]);
-            LDRImage * ldrImage = new LDRImage(orig_frame,exposureValue*0.000001);
-            ldrImageList.push_back(ldrImage);
-        }
-        if(index == 3)
-            break;
+
+
+
 
 
         // Uklizení aktuálního snímku
-        delete p_frame;
+        //delete p_frame;
+
+        if ( (255 & cv::waitKey( WIEW_WAIT_KEY_TIME )) == 27 ) // Esc
+            break;
 
 
         // Aktivní multi-expoziční režim - Posílání požadavku na sekvenci

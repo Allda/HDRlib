@@ -58,7 +58,9 @@ SOURCES += main.cpp \
     gui/mainwindow.cpp \
     gui/imageframe.cpp \
     gui/camerasettingsdialog.cpp \
-    gui/buildhdrthread.cpp
+    gui/buildhdrthread.cpp \
+    rgbe.cpp \
+    tonemapping/adaptivelogoperator.cpp
 
 HEADERS += \
     ldrimage.h \
@@ -84,7 +86,9 @@ HEADERS += \
     gui/mainwindow.h \
     gui/imageframe.h \
     gui/camerasettingsdialog.h \
-    gui/buildhdrthread.h
+    gui/buildhdrthread.h \
+    rgbe.h \
+    tonemapping/adaptivelogoperator.h
 
 FORMS    += gui/mainwindow.ui
 
@@ -94,7 +98,8 @@ OTHER_FILES += \
     multiexposureCamera/NOTE.txt \
     multiexposureCamera/Binarni_struktura_paketu.txt \
     multiexposureCamera/Readme.txt \
-    multiexposureCamera/configuration.txt
+    multiexposureCamera/configuration.txt \
+    format/rgbe.txt
 
 
 win32 {

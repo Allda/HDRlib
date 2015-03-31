@@ -20,7 +20,9 @@
 #include "tonemapping/logoperator.h"
 #include "tonemapping/expoperator.h"
 #include "tonemapping/reinhardglobaloperator.h"
+#include "tonemapping/adaptivelogoperator.h"
 #include "multiexposureCamera/camera_controller.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -48,11 +50,14 @@ public:
 private:
     Ui::MainWindow *ui;
     QAction * openFileAct;
-    QAction * cameraSettingsAct;
+    QAction * openHDRAct;
     QAction * loadCameraImagesAct;
     QAction * exitAct;
     QAction * saveHDRAct;
     QAction * exportAct;
+    QAction * saveSequenceAct;
+    QAction * cameraSettingsAct;
+    QAction * cameraPreviewAct;
     QMenu * fileMenu;
     QMenu * cameraMenu;
     QList<ImageFrame *> imageList;
@@ -82,6 +87,7 @@ private:
     QRadioButton * linearMappingRadio;
     QRadioButton * logMappingRadio;
     QRadioButton * expMappingRadio;
+    QRadioButton * adaptiveLogMapRadio;
     QRadioButton * reinhardMappingRadio;
     QSlider * logQslider;
     QSlider * logKslider;
@@ -92,11 +98,18 @@ private:
     QSlider * expKslider;
     QLabel * expQVal;
     QLabel * expKVal;
+
+    QSlider * adaptiveLogLdmaxSlider;
+    QSlider * adaptiveLogBiasSlider;
+    QLabel * adaptiveLogLdmaxVal;
+    QLabel * adaptiveLogBiasVal;
+
     LDRImage * finalLDRimage;
 
 
 private slots:
     void openFile();
+    void openHDR();
     void openCameraSettingsDialog();
     void importCameraImages();
     void exit();
@@ -107,6 +120,8 @@ private slots:
     void saveHDR();
     void exportImage();
     void deleteImage();
+    void cameraPreview();
+    void saveSequence();
 };
 
 #endif // MAINWINDOW_H

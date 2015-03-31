@@ -14,6 +14,8 @@
 #include "tonemapping/reinhardglobaloperator.h"
 #include <QSpacerItem>
 #include <QProgressDialog>
+#include "stdio.h"
+#include "rgbe.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -26,7 +28,6 @@ MainWindow::MainWindow(QWidget *parent) :
     initLoadPage();
     initGenerateHDRpage();
     initStyleSheet();
-    ui->statusBar->showMessage("Nejaky text",10000);
     ui->stackedWidget->setCurrentIndex(0);
 
 }
@@ -53,26 +54,36 @@ void MainWindow::initStyleSheet(){
 }
 
 void MainWindow::initMenu(){
-    openFileAct = new QAction(tr("&Open file"),this);
-    connect(openFileAct,SIGNAL(triggered()),this,SLOT(openFile()));
     fileMenu = menuBar()->addMenu(tr("&File"));
-    fileMenu->addAction(openFileAct);
-    cameraSettingsAct = new QAction(tr("&Camera settings"),this);
     cameraMenu = menuBar()->addMenu(tr("&Camera"));
-    cameraMenu->addAction(cameraSettingsAct);
-    connect(cameraSettingsAct,SIGNAL(triggered()),this,SLOT(openCameraSettingsDialog()));
+    openFileAct = new QAction(tr("&Open file"),this);
     loadCameraImagesAct = new QAction(tr("&Import camera images"),this);
-    fileMenu->addAction(loadCameraImagesAct);
-    connect(loadCameraImagesAct,SIGNAL(triggered()), this, SLOT(importCameraImages()));
-    exitAct = new QAction(tr("&Exit"), this);
-    fileMenu->addAction(exitAct);
-    connect(exitAct,SIGNAL(triggered()), this, SLOT(exit()));
+    openHDRAct = new QAction(tr("&Open HDR"),this);
     saveHDRAct = new QAction(tr("&Save as HDR"),this);
-    fileMenu->addAction(saveHDRAct);
-    connect(saveHDRAct,SIGNAL(triggered()),this,SLOT(saveHDR()));
     exportAct = new QAction(tr("&Export image"),this);
+    saveSequenceAct = new QAction(tr("&Save sequence"),this);
+    exitAct = new QAction(tr("&Exit"), this);
+    fileMenu->addAction(openFileAct);
+    fileMenu->addAction(loadCameraImagesAct);
+    fileMenu->addAction(openHDRAct);
+    fileMenu->addAction(saveHDRAct);
     fileMenu->addAction(exportAct);
+    fileMenu->addAction(saveSequenceAct);
+    fileMenu->addAction(exitAct);
+    cameraSettingsAct = new QAction(tr("&Camera settings"),this);
+    cameraPreviewAct = new QAction(tr("&Camera preview"),this);
+    cameraMenu->addAction(cameraSettingsAct);
+    cameraMenu->addAction(cameraPreviewAct);
+    connect(openFileAct,SIGNAL(triggered()),this,SLOT(openFile()));
+    connect(openHDRAct,SIGNAL(triggered()),this,SLOT(openHDR()));
+    connect(loadCameraImagesAct,SIGNAL(triggered()), this, SLOT(importCameraImages()));
+    connect(saveHDRAct,SIGNAL(triggered()),this,SLOT(saveHDR()));
     connect(exportAct, SIGNAL(triggered()),this,SLOT(exportImage()));
+    connect(saveSequenceAct,SIGNAL(triggered()),this,SLOT(saveSequence()));
+    connect(exitAct,SIGNAL(triggered()), this, SLOT(exit()));
+    connect(cameraSettingsAct,SIGNAL(triggered()),this,SLOT(openCameraSettingsDialog()));
+    connect(cameraPreviewAct,SIGNAL(triggered()),this,SLOT(cameraPreview()));
+    saveSequenceAct->setEnabled(false);
     exportAct->setEnabled(false);
     saveHDRAct->setEnabled(false);
 }
@@ -164,11 +175,13 @@ void MainWindow::initGenerateHDRpage(){
     linearMappingRadio = new QRadioButton("Linear mapping", tonemappingWidgetContents);
     logMappingRadio = new QRadioButton("Logarithmic mapping", tonemappingWidgetContents);
     expMappingRadio = new QRadioButton("Exponencial mapping", tonemappingWidgetContents);
+    adaptiveLogMapRadio = new QRadioButton("Adaptive logarithmic mapping", tonemappingWidgetContents);
     reinhardMappingRadio = new QRadioButton("Reinhard mapping", tonemappingWidgetContents);
     linearMappingRadio->setChecked(true);
     radioGroup->addButton(linearMappingRadio);
     radioGroup->addButton(logMappingRadio);
     radioGroup->addButton(expMappingRadio);
+    radioGroup->addButton(adaptiveLogMapRadio);
     radioGroup->addButton(reinhardMappingRadio);
 
     QLabel * logQ = new QLabel("Q:", tonemappingWidgetContents);
@@ -193,6 +206,18 @@ void MainWindow::initGenerateHDRpage(){
     expKVal = new QLabel("0",tonemappingWidgetContents);
     connect(expKslider,SIGNAL(valueChanged(int)),expKVal, SLOT(setNum(int)));
 
+    QLabel * adaptiveLogBias = new QLabel("Bias:", tonemappingWidgetContents);
+    QLabel * adaptiveLogLdmax = new QLabel("Ld max:", tonemappingWidgetContents);
+    adaptiveLogBias->setStyleSheet("margin-left:30px");
+    adaptiveLogLdmax->setStyleSheet("margin-left:30px");
+    adaptiveLogLdmaxSlider = new QSlider(Qt::Horizontal,tonemappingWidgetContents);
+    adaptiveLogLdmaxSlider->setMaximum(20000);
+    adaptiveLogLdmaxVal = new QLabel("0",tonemappingWidgetContents);
+    connect(adaptiveLogLdmaxSlider,SIGNAL(valueChanged(int)),adaptiveLogLdmaxVal, SLOT(setNum(int)));
+    adaptiveLogBiasSlider = new QSlider(Qt::Horizontal,tonemappingWidgetContents);
+    adaptiveLogBiasVal = new QLabel("0",tonemappingWidgetContents);
+    connect(adaptiveLogBiasSlider,SIGNAL(valueChanged(int)),adaptiveLogBiasVal, SLOT(setNum(int)));
+
 
 
     tonemappingLayout->addWidget(linearMappingRadio,0,0,1,3);
@@ -210,7 +235,14 @@ void MainWindow::initGenerateHDRpage(){
     tonemappingLayout->addWidget(expK,6,0);
     tonemappingLayout->addWidget(expKslider,6,1);
     tonemappingLayout->addWidget(expKVal,6,2);
-    tonemappingLayout->addWidget(reinhardMappingRadio,7,0,1,3);
+    tonemappingLayout->addWidget(adaptiveLogMapRadio,7,0,1,3);
+    tonemappingLayout->addWidget(adaptiveLogLdmax,8,0);
+    tonemappingLayout->addWidget(adaptiveLogLdmaxSlider,8,1);
+    tonemappingLayout->addWidget(adaptiveLogLdmaxVal,8,2);
+    tonemappingLayout->addWidget(adaptiveLogBias,9,0);
+    tonemappingLayout->addWidget(adaptiveLogBiasSlider,9,1);
+    tonemappingLayout->addWidget(adaptiveLogBiasVal,9,2);
+    tonemappingLayout->addWidget(reinhardMappingRadio,10,0,1,3);
 }
 
 void MainWindow::addImages(std::string filename){
@@ -223,8 +255,10 @@ void MainWindow::addImages(LDRImage *ldrImage){
     ImageFrame * frame = new ImageFrame(ldrImage);
     connect(frame,SIGNAL(clicked(ImageFrame *)),this,SLOT(changeBigImage(ImageFrame *)));
     // first image = set border, set as bigImage
-    if(imageList.size() == 0)
+    if(imageList.size() == 0){
         emit frame->clicked(frame);
+        saveSequenceAct->setEnabled(true);
+    }
     imageList.append(frame);
 
     frame->setCursor(Qt::PointingHandCursor);
@@ -340,75 +374,66 @@ void MainWindow::openCameraSettingsDialog(){
 }
 
 void MainWindow::importCameraImages(){
-    /*QMessageBox::StandardButton reply;
+    QMessageBox::StandardButton reply;
     reply = QMessageBox::question(this, "Input filter", "Use bayer filter?",
                                 QMessageBox::Yes|QMessageBox::No);
-    if (reply == QMessageBox::Yes) {
 
-    }
-    else {
 
-    }*/
-    int numTasks = 100;
-    QProgressDialog *  progress = new QProgressDialog("Task in progress...", "Cancel", 0, numTasks);
-    /*progress->setWindowModality(Qt::WindowModal);
-    progress->show();
-    //progress->setMinimumDuration(5000);
-    progress->setAutoClose(false);
-    //progress->setAutoClose(false);
-    for (int i = 0; i < numTasks; i+=25) {
-        progress->setValue(i);
-        if (progress->wasCanceled()){
-            break;
-        }
-        for(int j=0;j < 100000; j++)
-            std::cout << j << std::endl;
-        progress->setValue(numTasks);
-        if(i % 10 == 0) QApplication::processEvents();
-    }
-    progress->close();*/
     CameraController camera_controller;
     vector<LDRImage *> ldrImageList;
 
     QMessageBox msgBox(this);
-
+    ui->statusBar->showMessage("Loading configuration file..");
     msgBox.setIcon(QMessageBox::Critical);
     if ( ! camera_controller.loadConfiguration( "multiexposureCamera/configuration.txt" ) ){
         msgBox.setText("Can't load config file                        ");
-        //msgBox.setInformativeText("Must contain at least 3 images");
         msgBox.exec();
         return;
     }
+    ui->statusBar->showMessage("Connecting to camera..");
 
 
 
     if ( ! camera_controller.connectToCamera() ){
         msgBox.setText("Unable to connect to the camera           ");
-        //msgBox.setInformativeText("Must contain at least 3 images");
         msgBox.exec();
         return;
     }
 
-    if ( ! camera_controller.configureCamera() )
+    ui->statusBar->showMessage("Configure camera..");
+
+    if ( ! camera_controller.configureCamera() ){
         msgBox.setText("Unable to configure the camera           ");
-        //msgBox.setInformativeText("Must contain at least 3 images");
         msgBox.exec();
         return;
+    }
+
+    ui->statusBar->showMessage("Downloading images..");
 
     try{
         ldrImageList = camera_controller.getImages();
     }catch(exception e){
             msgBox.setText("Unable to get images           ");
-            //msgBox.setInformativeText("Must contain at least 3 images");
             msgBox.exec();
             return;
     }
 
     for(unsigned i = 0; i < ldrImageList.size();i++){
         LDRImage * ldrImage = ldrImageList.at(i);
+        Mat origMat = ldrImage->getImageMat();
+        Mat colorMat;
+        if (reply == QMessageBox::Yes) {
+            cvtColor(origMat, colorMat,CV_BayerGR2BGR);
+        }
+        else {
+            cvtColor(origMat,colorMat,CV_GRAY2BGR);
+        }
 
-        ldrImage->showImage();
+        ldrImage->setImageMat(colorMat);
+        this->addImages(ldrImage);
     }
+    ui->statusBar->showMessage("Done",5000);
+
 
 
 }
@@ -454,6 +479,13 @@ void MainWindow::toneMapping(){
         k = expKslider->value() * 0.01;
         finalLDRimage = expOp->process(q,k);
     }
+    else if(adaptiveLogMapRadio->isChecked()){
+        AdaptiveLogOperator * adaptiveLogOp = new AdaptiveLogOperator(hdrImage);
+        double q,k;
+        q = adaptiveLogLdmaxSlider->value();
+        k = adaptiveLogBiasSlider->value() * 0.01;
+        finalLDRimage = adaptiveLogOp->process(q,k);
+    }
     else if(reinhardMappingRadio->isChecked()){
         ReinhardGlobalOperator * reinhardOp = new ReinhardGlobalOperator(hdrImage);
         finalLDRimage = reinhardOp->process();
@@ -470,8 +502,40 @@ void MainWindow::toneMapping(){
 void MainWindow::saveHDR(){
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
                                ".",
-                               tr("Images (*.png *.xpm *.jpg)"));
+                               tr("Images (*.hdr)"));
+    QFileInfo f(fileName);
+    if(f.suffix() == "")
+        fileName += ".hdr";
     std::cout << fileName.toStdString() << std::endl;
+    FILE * file;
+    file = fopen(fileName.toStdString().c_str(),"wb");
+    if(file == NULL)
+        return;
+
+    RGBE_WriteHeader(file,hdrImage->getMat().cols ,hdrImage->getMat().rows,NULL);
+    RGBE_WritePixels(file,(float*)hdrImage->getMat().data,hdrImage->getMat().cols * hdrImage->getMat().rows);
+    fclose(file);
+}
+
+void MainWindow::openHDR(){
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open HDR"),
+                               ".",
+                               tr("Images (*.hdr)"));
+    FILE *f;
+    f = fopen(fileName.toStdString().c_str() ,"rb");
+    int width, height;
+    float* image;
+    RGBE_ReadHeader(f,&width,&height,NULL);
+    image = (float *)malloc(sizeof(float)*3*width*height);
+    RGBE_ReadPixels_RLE(f,image,width,height);
+    Mat mat = Mat(height,width,CV_32FC3,image);
+    hdrImage = new HDRImage(mat);
+    ui->stackedWidget->setCurrentIndex(1);
+    finalImage->clear();
+    generateButton->setEnabled(true);
+    ui->statusBar->showMessage("HDR file loaded");
+
+    fclose(f);
 }
 
 void MainWindow::exportImage(){
@@ -494,8 +558,58 @@ void MainWindow::deleteImage(){
             if(imageList.size() > 0){
                 emit imageList.at(0)->clicked(imageList.at(0));
             }
-            else
+            else{
                 loadedBigImage->clear();
+                saveSequenceAct->setEnabled(false);
+                imageExifInfo->clear();
+            }
         }
     }
+}
+
+void MainWindow::cameraPreview(){
+    CameraController camera_controller;
+
+    QMessageBox msgBox(this);
+
+    msgBox.setIcon(QMessageBox::Critical);
+    if ( ! camera_controller.loadConfiguration( "multiexposureCamera/configuration.txt" ) ){
+        msgBox.setText("Can't load config file                        ");
+        msgBox.exec();
+        return;
+    }
+    if ( ! camera_controller.connectToCamera() ){
+        msgBox.setText("Unable to connect to the camera           ");
+        msgBox.exec();
+        return;
+    }
+
+    if ( ! camera_controller.configureCamera() ){
+        msgBox.setText("Unable to configure the camera           ");
+        msgBox.exec();
+        return;
+    }
+    camera_controller.show();
+
+}
+
+void MainWindow::saveSequence(){
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
+                               ".",
+                               tr("Images (*.png *.jpg)"));
+    QFileInfo f(fileName);
+    if(f.suffix() == "")
+        fileName += ".jpg";
+
+    for(int i=0; i< getLDRImageList().size();i++){
+        QString newPath = f.absoluteDir().absolutePath() + QDir::separator() + f.baseName() + QString::number(i);;
+        if (!f.completeSuffix().isEmpty())
+            newPath += "." + f.completeSuffix();
+        else
+            newPath += ".jpg";
+        std::cout << newPath.toStdString() <<std::endl;
+        LDRImage * ldrImage = getLDRImageList().at(i);
+        imwrite(newPath.toStdString(),ldrImage->getImageMat());
+    }
+
 }
