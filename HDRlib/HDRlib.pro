@@ -75,7 +75,7 @@ HEADERS += \
     tonemapping/logoperator.h \
     tonemapping/expoperator.h \
     tonemapping/reinhardglobaloperator.h \
-    multiexposureCamera/frame.hpp \
+    multiexposureCamera/frame.h \
     multiexposureCamera/multi_exposure_camera_thrd.h \
     multiexposureCamera/multi_exposure_camera_common.h \
     multiexposureCamera/multi_exposure_camera.h \
