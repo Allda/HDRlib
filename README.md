@@ -27,7 +27,8 @@ $ ./HDRlib
 * [Exiv2] - library which can read and write Exif information from image
 
 ### Licence
-
+GNU GENERAL PUBLIC LICENSE Version 3
+more in LICENSE file
 
 [OpenCV]:http://opencv.org/
 [Exiv2]:http://www.exiv2.org/
