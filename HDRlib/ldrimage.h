@@ -30,18 +30,24 @@ public:
     void showImage();
     bool getExifInfo(const char * name);
     double getExposureTime();
+    double getAperture();
+    long getISO();
     Vec3b getPixel(int x, int y);
     QImage getQImage(int maxWidth, int maxHeight);
     QImage getQImage();
     QImage Mat2QImage(cv::Mat const& src);
+    void saveImage(QString fileName);
 
 
 private:
-
-    double exposureTime;
+    void saveExifData(QString fileName);
+    double exposureTime, aperture;
+    long iso;
     cv::Mat mat;
     double width, height;
     string dateTime;
+    int gcd(int a,int b);
+    void doubleToRational(double num);
 };
 
 #endif // LDRIMAGE_H

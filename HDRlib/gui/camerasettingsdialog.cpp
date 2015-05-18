@@ -15,7 +15,7 @@ CameraSettingsDialog::CameraSettingsDialog(QWidget *parent)
 
     QFont f( "Arial", 14, QFont::Bold);
 
-
+    // labels and input boxes
     networkLabel = new QLabel(this);
     networkLabel->setText("Network setting");
     networkLabel->setFont(f);
@@ -103,6 +103,7 @@ void CameraSettingsDialog::loadConfigData(){
     if (inputFile.open(QIODevice::ReadWrite))
     {
        QTextStream in(&inputFile);
+       // each line starts with label
        while (!in.atEnd())
        {
           QString line = in.readLine();
@@ -136,6 +137,7 @@ void CameraSettingsDialog::loadConfigData(){
     }
 }
 
+// submit button slot - save values to configuration file
 void CameraSettingsDialog::submitClickSlot(){
     QFile inputFile("multiexposureCamera/configuration.txt");
     QString wholeFileText;
@@ -144,6 +146,7 @@ void CameraSettingsDialog::submitClickSlot(){
        QTextStream in(&inputFile);
        while (!in.atEnd())
        {
+           // if line is known -> rewrite value
           QString line = in.readLine();
           if(line.startsWith("LOCAL_IP")){
               line = "LOCAL_IP = " +localIPinput->text();
@@ -171,6 +174,7 @@ void CameraSettingsDialog::submitClickSlot(){
           }
           wholeFileText += line + "\n";
        }
+       // write whole content
        inputFile.seek(0); // go to the beginning of the file
        inputFile.write(wholeFileText.toUtf8()); // write the new text back to the file*/
        inputFile.close();

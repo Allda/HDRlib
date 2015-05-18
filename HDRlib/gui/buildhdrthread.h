@@ -13,6 +13,7 @@ public:
     void addResult(HDRImage * hdrImage);
     void addHDRcreator(HDRCreator * hdr);
     HDRImage * getHDRimage();
+    QTime timer;
 
     ~BuildHDRThread();
 protected:

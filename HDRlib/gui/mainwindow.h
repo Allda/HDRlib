@@ -43,7 +43,6 @@ public:
     void addImages(std::string filename);
     void addImages(LDRImage * ldrImage);
     void resizeEvent(QResizeEvent* event);
-    string int2String(int value);
     string double2String(double val);
     ~MainWindow();
 

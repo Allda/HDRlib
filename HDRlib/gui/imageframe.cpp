@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+// custom label for image as frame
 ImageFrame::ImageFrame(LDRImage *ldrImage , QWidget *parent, bool clickable)
     :QLabel(parent)
 {
@@ -23,6 +24,7 @@ void ImageFrame::setLDRImage(LDRImage * ldrImage){
     this->ldrImage = ldrImage;
 }
 
+// click event
 void ImageFrame::mousePressEvent ( QMouseEvent * event )
 {
     if(clickable){

@@ -6,9 +6,11 @@
 class ExpOperator : public ToneMapping
 {
 public:
-    ExpOperator(HDRImage * image);
-    LDRImage * process(double q, double k);
+    ExpOperator(HDRImage * image, double q, double k);
+    LDRImage * process();
     ~ExpOperator();
+private:
+    double q,k;
 };
 
 #endif // EXPOPERATOR_H

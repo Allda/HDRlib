@@ -10,7 +10,7 @@ HDRCreator::HDRCreator()
 {
 
 }
-
+// List of input images
 HDRCreator::HDRCreator(vector<LDRImage *> imageList){
     this->imageList = imageList;
 }
@@ -27,6 +27,7 @@ void HDRCreator::setWeightFunction(WeightFunction *wf){
     this->wf = wf;
 }
 
+// checking images size
 bool HDRCreator::checkImages(){
     int width = imageList.at(0)->getImageMat().cols;
     int height = imageList.at(0)->getImageMat().rows;
@@ -91,14 +92,18 @@ void HDRCreator::clearArray(double a[], int size){
     }
 }
 
-void HDRCreator::setPixel(double x, double y, int ch){
-
-}
 
 double HDRCreator::getWFvalue(int i){
     if(i == 0 || i == 255)
         return table[1];
     return table[i];
+}
+
+void HDRCreator::setResponseFunct(double funct[]){
+    for(int i = 0; i < 256; i++){
+        this->responseFunct[i] = funct[i];
+
+    }
 }
 
 HDRCreator::~HDRCreator()

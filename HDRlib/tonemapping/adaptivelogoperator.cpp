@@ -6,6 +6,7 @@ AdaptiveLogOperator::AdaptiveLogOperator(HDRImage * image)
 
 }
 
+// not working yet
 LDRImage * AdaptiveLogOperator::process(double q, double k){
     double delta = 0.01;
     int width = image->getMat().cols;

@@ -19,6 +19,7 @@ public:
 
 protected:
     HDRImage * image;
+    int height, width, channels;
 };
 
 #endif // TONEMAPPING_H

@@ -27,7 +27,7 @@
 using namespace cv;
 using namespace std;
 
-
+// Load LDR images from storage
 deque<LDRImage *> loadLDRImages(string name, string extension, int count, int start, bool expand){
     deque<LDRImage *> d;
     for(int i = 0; i < count; i++){
@@ -42,7 +42,7 @@ deque<LDRImage *> loadLDRImages(string name, string extension, int count, int st
     return d;
 }
 
-
+// Connect to camera and grap 3 frames.. for comand line only
 vector<LDRImage *> cameraInit(){
     CameraController camera_controller;
     vector<LDRImage *> ldrImageList;
@@ -76,55 +76,9 @@ vector<LDRImage *> cameraInit(){
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-
+    // GUI application
     MainWindow w;
     w.show();
-
-    /*vector<LDRImage *> ldrImages =  cameraInit();
-    deque<LDRImage *> ldrImages2;
-    for(unsigned i= 0; i < ldrImages.size();i++){
-        Mat colorMat;
-        LDRImage * ldrIm = ldrImages.at(i);
-        cvtColor(ldrIm->getImageMat(),colorMat,COLOR_GRAY2BGR);
-        ldrImages2.push_back(new LDRImage(colorMat, ldrIm->getExposureTime()));
-    }*/
-    /*LDRImage * image = new LDRImage("img/1.JPG");
-    LDRImage * image2 = new LDRImage("img/2.JPG");
-    LDRImage * image3 = new LDRImage("img/3.JPG");*/
-
-
-    /*deque<LDRImage *> ldrImage = loadLDRImages(string("img/chram"),string("jpg"),3,1, false);
-
-
-
-    HDRCreator * hdr = new HDRCreator(ldrImage);
-
-    DebevecMalikWF * wf = new DebevecMalikWF();
-
-
-    hdr->setWeightFunction(wf);
-
-    HDRImage * out;
-    try{
-        out = hdr->buildHDR();
-        namedWindow( "Display window", CV_WINDOW_NORMAL | CV_WINDOW_KEEPRATIO );// Create a window for display.
-        imshow( "Display window", out->getMat() );                   // Show our image inside it.
-    }
-    catch(NotEnoughImagesException e){
-        cout << e.what() << endl;
-    }
-    catch(ImageSizeException e){
-        cout << e.what() << endl;
-    }
-    catch(exception e){
-        cout << "WF none"  << e.what() << endl;
-    }
-
-
-    ReinhardGlobalOperator * op = new ReinhardGlobalOperator(out);
-    LDRImage * outputLDR = op->process();
-    outputLDR->showImage();*/
-
 
     return a.exec();
 }

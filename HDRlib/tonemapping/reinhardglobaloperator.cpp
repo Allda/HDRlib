@@ -7,14 +7,12 @@ ReinhardGlobalOperator::ReinhardGlobalOperator(HDRImage *image)
 }
 
 LDRImage * ReinhardGlobalOperator::process(){
-    double count = image->getMat().cols * image->getMat().rows;
+    double count = width * height;
     double delta = 0.01;
-    double Lw[image->getMat().channels()];
+    double Lw[channels];
     memset(Lw,0,image->getMat().channels());
 
-    int width = image->getMat().cols;
-    int height = image->getMat().rows;
-    int channels = image->getMat().channels();
+    // Firts part of algorithm -> count Lw for every channel
     for(int x = 0; x < width;x++){
         for(int y = 0; y < height;y++){
             for(int ch = 0; ch < channels;ch++){
@@ -31,6 +29,7 @@ LDRImage * ReinhardGlobalOperator::process(){
     double max[channels];
     for(int i = 0; i < channels;i++)
         max[i] = 0;
+    // get max value of each channel
     for(int x = 0; x < width; x++){
         for(int y = 0; y < height; y++){
             for(int ch = 0; ch < channels; ch++){
@@ -45,8 +44,10 @@ LDRImage * ReinhardGlobalOperator::process(){
     for(int x = 0; x < width; x++){
         for(int y = 0; y < height; y++){
             for(int ch = 0; ch < channels; ch++){
+                // Lvalue
                 LMat.at<Vec3f>(y,x)[ch] = (0.72/Lw[ch]) * image->getMat().at<Vec3f>(y,x)[ch];
                 double numerator = LMat.at<Vec3f>(y,x)[ch] * (1+(LMat.at<Vec3f>(y,x)[ch]/(max[ch])));
+                // output value
                 output.at<Vec3b>(y,x)[ch] = (numerator/(1+LMat.at<Vec3f>(y,x)[ch]))*255;
             }
         }

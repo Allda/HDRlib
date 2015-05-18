@@ -4,14 +4,13 @@ LinearOperator::LinearOperator(HDRImage * image)
     :ToneMapping(image)
 {
 
+
 }
 
 
 LDRImage * LinearOperator::process(){
     double min, max;
-    int width = image->getMat().cols;
-    int height = image->getMat().rows;
-    int channels = image->getMat().channels();
+    // get maximum for constatnt e
     cv::minMaxLoc(image->getMat(), &min, &max);
     double e = 255/max;
     Mat output = Mat(height,width,CV_8UC3,Scalar(0,0,0));

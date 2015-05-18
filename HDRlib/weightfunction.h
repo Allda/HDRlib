@@ -7,7 +7,7 @@ class WeightFunction
 public:
     WeightFunction();
     ~WeightFunction();
-    virtual double getWeight(unsigned char i);
+    virtual double getWeight(unsigned char i) = 0;
 
 protected:
     char table[256];

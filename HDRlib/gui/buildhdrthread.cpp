@@ -14,7 +14,9 @@ void BuildHDRThread::addResult(HDRImage *hdrImage){
 }
 
 void BuildHDRThread::run(){
+    timer.start();
     hdrImage = hdr->buildHDR();
+    std::cout << "HDR build time: " << timer.elapsed() << std::endl;
 }
 
 HDRImage * BuildHDRThread::getHDRimage(){

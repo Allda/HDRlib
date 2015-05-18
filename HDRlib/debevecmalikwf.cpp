@@ -3,6 +3,8 @@
 
 
 using namespace std;
+
+// Initialize values for DebevecMalik WF
 DebevecMalikWF::DebevecMalikWF()
 {
     int min = 0, max = 255;
@@ -17,6 +19,7 @@ DebevecMalikWF::DebevecMalikWF()
 
 }
 
+// get weight for pixel with value i
 double DebevecMalikWF::getWeight(unsigned char i){
     if(i == 0 || i == 255)
         return table[1];

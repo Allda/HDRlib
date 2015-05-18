@@ -267,7 +267,7 @@ std::vector<LDRImage *> CameraController::getImages()
 {
     Frame * p_frame;
     unsigned int img_id;
-    bool startCapturing = false;
+    //bool startCapturing = false;
 
     std::map<int, int> exposureIDHistory;
 
@@ -366,7 +366,7 @@ std::vector<LDRImage *> CameraController::getImages()
             if((img_id-1)%3 == 0 ){
                 std::cout <<"First:" << img_id << std::endl;
                 //cv::imshow( "First", orig_frame );
-                startCapturing = true;
+                //startCapturing = true;
                 index = 1;
                 double exposureValue = mp_configuration->getExposureValue(exposureIDHistory[img_id]);
                 ldrImage = new LDRImage(orig_frame,exposureValue*0.000001);

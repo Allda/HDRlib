@@ -211,6 +211,8 @@ bool MultiExposureCamera::bindToCamera( void )
 bool MultiExposureCamera::grabFrame( bool must_complete )
 {
     int recv_error_count = 0;
+    if(must_complete)
+        recv_error_count = 0;
 
     while ( true )
     {

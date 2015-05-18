@@ -21,6 +21,8 @@ public:
     void setWeightFunction(WeightFunction * wf);
     HDRImage *buildHDR();
     double getWFvalue(int i);
+    bool checkImages();
+    void setResponseFunct(double funct[]);
     ~HDRCreator();
 
 private:
@@ -28,10 +30,10 @@ private:
     Mat output;
     WeightFunction * wf = NULL;
     double table[256];
+    double responseFunct[256];
 
-    bool checkImages();
+
     void clearArray(double a[], int size);
-    void setPixel(double x,double y,int ch);
 
 };
 
